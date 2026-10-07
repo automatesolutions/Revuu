@@ -1,0 +1,14 @@
+**/node_modules
+**/.next
+**/test-results
+**/playwright-report
+.git
+.github
+.screens
+.agents
+.cursor
+.impeccable
+**/.env
+**/.env*.local
+**/*.log
+**/*.tsbuildinfo

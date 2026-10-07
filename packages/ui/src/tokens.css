@@ -1,0 +1,224 @@
+/*
+ * Revuu design tokens. Light values live in @theme; dark values override the same custom
+ * properties under [data-theme="dark"]. Mirrored in tokens.ts; `pnpm check:contrast` fails on drift.
+ * Edit with /tweak, then `pnpm tweak:bake`.
+ */
+
+@theme {
+  --color-*: initial;
+  --color-transparent: transparent;
+  --color-current: currentColor;
+
+  --color-canvas: #fbfaf7;
+  --color-surface: #f3f1ec;
+  --color-raised: #ffffff;
+  --color-sunken: #ece9e2;
+  --color-hairline: #e4e1da;
+  --color-hairline-strong: #cfcac0;
+  --color-border-input: #858991;
+  --color-ink: #0f1115;
+  --color-ink-muted: #4a4f59;
+  --color-ink-subtle: #62666f;
+  --color-primary: #0f1115;
+  --color-primary-hover: #2a2e36;
+  --color-on-primary: #fbfaf7;
+  --color-accent: #a84b17;
+  --color-accent-strong: #8c3c0f;
+  --color-on-accent: #ffffff;
+  --color-focus: #c2581c;
+  --color-block-solder: #cfe6d2;
+  --color-block-fr4: #efe6cc;
+  --color-block-silk: #e6e3f5;
+  --color-block-copper: #f4d9c6;
+  --color-block-board: #14213d;
+  --color-on-block-board: #f3f1ec;
+  --color-status-approved: #137137;
+  --color-status-approved-bg: #ddf3e4;
+  --color-status-warning: #7f4b00;
+  --color-status-warning-bg: #fff0d1;
+  --color-status-eol: #6235c2;
+  --color-status-eol-bg: #ece5fb;
+  --color-status-rejected: #b42318;
+  --color-status-rejected-bg: #fde3e1;
+  --color-status-pending: #3b5ba5;
+  --color-status-pending-bg: #e3eaf8;
+  --color-scrim: rgb(15 17 21 / 0.55);
+
+  --text-*: initial;
+  --text-display-xl: 5rem;
+  --text-display-xl--line-height: 0.98;
+  --text-display-xl--letter-spacing: -0.03em;
+  --text-display-xl--font-weight: 700;
+  --text-display-lg: 3.5rem;
+  --text-display-lg--line-height: 1.02;
+  --text-display-lg--letter-spacing: -0.025em;
+  --text-display-lg--font-weight: 700;
+  --text-display-md: 2.75rem;
+  --text-display-md--line-height: 1.04;
+  --text-display-md--letter-spacing: -0.025em;
+  --text-display-md--font-weight: 700;
+  --text-headline: 2rem;
+  --text-headline--line-height: 1.1;
+  --text-headline--letter-spacing: -0.02em;
+  --text-headline--font-weight: 700;
+  --text-page-title: 1.625rem;
+  --text-page-title--line-height: 1.15;
+  --text-page-title--letter-spacing: -0.015em;
+  --text-page-title--font-weight: 700;
+  --text-title: 1.375rem;
+  --text-title--line-height: 1.2;
+  --text-title--letter-spacing: -0.01em;
+  --text-title--font-weight: 700;
+  --text-body-lg: 1.1875rem;
+  --text-body-lg--line-height: 1.5;
+  --text-body-lg--letter-spacing: -0.005em;
+  --text-subtitle: 1.0625rem;
+  --text-subtitle--line-height: 1.75rem;
+  --text-subtitle--font-weight: 700;
+  --text-body: 1rem;
+  --text-body--line-height: 1.55;
+  --text-body-sm: 0.875rem;
+  --text-body-sm--line-height: 1.5;
+  --text-ui: 0.8125rem;
+  --text-ui--line-height: 1.25rem;
+  --text-ui--letter-spacing: 0.005em;
+  --text-label: 0.8125rem;
+  --text-label--line-height: 1.3;
+  --text-label--letter-spacing: 0.005em;
+  --text-label--font-weight: 600;
+  --text-button: 0.9375rem;
+  --text-button--line-height: 1.2;
+  --text-button--font-weight: 600;
+  --text-caption: 0.75rem;
+  --text-caption--line-height: 1.3;
+  --text-caption--letter-spacing: 0.02em;
+  --text-caption--font-weight: 600;
+  --text-micro: 0.6875rem;
+  --text-micro--line-height: 1rem;
+  --text-micro--letter-spacing: 0.01em;
+  --text-data: 0.78125rem;
+  --text-data--line-height: 1.25rem;
+
+  --font-weight-book: 450;
+
+  --radius-*: initial;
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-pill: 999px;
+  --radius-full: 9999px;
+
+  --shadow-*: initial;
+  --shadow-popover: 0 8px 24px -8px rgb(15 17 21 / 0.18), 0 2px 6px -2px rgb(15 17 21 / 0.08);
+  --shadow-dialog: 0 24px 64px -16px rgb(15 17 21 / 0.28), 0 4px 12px -4px rgb(15 17 21 / 0.1);
+
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-entrance: cubic-bezier(0.16, 1, 0.3, 1);
+
+  --container-prose: 68ch;
+  --container-content: 75rem;
+  --container-wide: 82.5rem;
+
+  --animate-shimmer: shimmer 1.4s var(--ease-standard) infinite;
+
+  @keyframes shimmer {
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
+  }
+}
+
+@theme inline {
+  --font-display: var(--font-cabinet), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-satoshi), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, "SFMono-Regular", Consolas, monospace;
+}
+
+/* Restores light values inside a dark ancestor (artboard frames, previews). Mirrors @theme. */
+[data-theme="light"] {
+  --color-canvas: #fbfaf7;
+  --color-surface: #f3f1ec;
+  --color-raised: #ffffff;
+  --color-sunken: #ece9e2;
+  --color-hairline: #e4e1da;
+  --color-hairline-strong: #cfcac0;
+  --color-border-input: #858991;
+  --color-ink: #0f1115;
+  --color-ink-muted: #4a4f59;
+  --color-ink-subtle: #62666f;
+  --color-primary: #0f1115;
+  --color-primary-hover: #2a2e36;
+  --color-on-primary: #fbfaf7;
+  --color-accent: #a84b17;
+  --color-accent-strong: #8c3c0f;
+  --color-on-accent: #ffffff;
+  --color-focus: #c2581c;
+  --color-block-solder: #cfe6d2;
+  --color-block-fr4: #efe6cc;
+  --color-block-silk: #e6e3f5;
+  --color-block-copper: #f4d9c6;
+  --color-block-board: #14213d;
+  --color-on-block-board: #f3f1ec;
+  --color-status-approved: #137137;
+  --color-status-approved-bg: #ddf3e4;
+  --color-status-warning: #7f4b00;
+  --color-status-warning-bg: #fff0d1;
+  --color-status-eol: #6235c2;
+  --color-status-eol-bg: #ece5fb;
+  --color-status-rejected: #b42318;
+  --color-status-rejected-bg: #fde3e1;
+  --color-status-pending: #3b5ba5;
+  --color-status-pending-bg: #e3eaf8;
+  --color-scrim: rgb(15 17 21 / 0.55);
+  --shadow-popover: 0 8px 24px -8px rgb(15 17 21 / 0.18), 0 2px 6px -2px rgb(15 17 21 / 0.08);
+  --shadow-dialog: 0 24px 64px -16px rgb(15 17 21 / 0.28), 0 4px 12px -4px rgb(15 17 21 / 0.1);
+
+  color-scheme: light;
+}
+
+[data-theme="dark"] {
+  --color-canvas: #0e1014;
+  --color-surface: #161920;
+  --color-raised: #1d2129;
+  --color-sunken: #0a0b0e;
+  --color-hairline: #2a2f38;
+  --color-hairline-strong: #3a404b;
+  --color-border-input: #6b727e;
+  --color-ink: #eceae4;
+  --color-ink-muted: #b0b4bc;
+  --color-ink-subtle: #8f949d;
+  --color-primary: #eceae4;
+  --color-primary-hover: #ffffff;
+  --color-on-primary: #0e1014;
+  --color-accent: #f0955c;
+  --color-accent-strong: #f7b286;
+  --color-on-accent: #0e1014;
+  --color-focus: #f0955c;
+  --color-block-solder: #18291d;
+  --color-block-fr4: #2a2518;
+  --color-block-silk: #211f38;
+  --color-block-copper: #2f1e14;
+  --color-block-board: #1a2b4f;
+  --color-on-block-board: #eceae4;
+  --color-status-approved: #6ad496;
+  --color-status-approved-bg: #10291a;
+  --color-status-warning: #f2b65a;
+  --color-status-warning-bg: #2d2210;
+  --color-status-eol: #bfa6f7;
+  --color-status-eol-bg: #241a3d;
+  --color-status-rejected: #ff8f85;
+  --color-status-rejected-bg: #351714;
+  --color-status-pending: #97b3f2;
+  --color-status-pending-bg: #16213a;
+  --color-scrim: rgb(0 0 0 / 0.65);
+
+  --shadow-popover: 0 12px 32px -8px rgb(0 0 0 / 0.6), 0 2px 8px -2px rgb(0 0 0 / 0.4);
+  --shadow-dialog: 0 24px 64px -12px rgb(0 0 0 / 0.7), 0 4px 12px -4px rgb(0 0 0 / 0.5);
+
+  color-scheme: dark;
+}

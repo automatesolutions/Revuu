@@ -1,0 +1,113 @@
+@import "tailwindcss";
+@import "@revuu/ui/tokens.css";
+
+@source "../../../../packages/ui/src";
+@plugin "@iconify/tailwind4";
+
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+@layer base {
+  html {
+    background-color: var(--color-canvas);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-weight: var(--font-weight-book);
+    font-feature-settings: "kern";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    caret-color: var(--color-accent);
+    scrollbar-color: var(--color-hairline-strong) var(--color-canvas);
+    color-scheme: light;
+  }
+
+  body {
+    min-height: 100dvh;
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  ::selection {
+    background-color: color-mix(in oklab, var(--color-accent) 24%, transparent);
+    color: var(--color-ink);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
+    border-radius: var(--radius-xs);
+  }
+
+  a {
+    text-underline-offset: 0.2em;
+    text-decoration-thickness: 1px;
+  }
+
+  table {
+    font-variant-numeric: tabular-nums;
+  }
+
+  [hidden] {
+    display: none !important;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+/* Holds the hero's starting frame while GSAP loads, so the final state doesn't flash on desktop. */
+@media (min-width: 1024px) and (prefers-reduced-motion: no-preference) and (scripting: enabled) {
+  #how-it-works:not([data-hs-armed]) [data-hs-before] {
+    visibility: visible;
+    opacity: 1;
+  }
+  #how-it-works:not([data-hs-armed]) [data-hs-after],
+  #how-it-works:not([data-hs-armed]) [data-hs-reveal] {
+    visibility: hidden;
+    opacity: 0;
+  }
+}
+
+@utility tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+@utility mpn {
+  font-family: var(--font-mono);
+  font-size: var(--text-data);
+  line-height: var(--text-data--line-height);
+  font-feature-settings: "zero";
+  letter-spacing: 0;
+}
+
+@utility skeleton {
+  background-image: linear-gradient(
+    90deg,
+    var(--color-surface) 0%,
+    var(--color-sunken) 50%,
+    var(--color-surface) 100%
+  );
+  background-size: 200% 100%;
+  animation: var(--animate-shimmer);
+  border-radius: var(--radius-xs);
+}

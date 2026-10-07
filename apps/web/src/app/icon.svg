@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <style>
+    .board { fill: #0f1115; }
+    .trace { fill: #fbfaf7; stroke: #fbfaf7; }
+    @media (prefers-color-scheme: dark) {
+      .board { fill: #eceae4; }
+      .trace { fill: #0e1014; stroke: #0e1014; }
+    }
+  </style>
+  <rect class="board" x="1.5" y="1.5" width="29" height="29" rx="8"/>
+  <path class="trace" d="M7.5 16.5 12.75 21.75 21.25 10.75" fill="none" stroke-width="3.25" stroke-linecap="round" stroke-linejoin="round" style="fill:none"/>
+  <circle class="trace" cx="21.75" cy="10.25" r="3.6" stroke="none"/>
+  <circle class="board" cx="21.75" cy="10.25" r="1.45"/>
+  <circle class="trace" cx="24.6" cy="24.6" r="1.7" stroke="none"/>
+</svg>
