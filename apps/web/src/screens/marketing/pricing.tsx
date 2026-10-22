@@ -17,30 +17,30 @@ const tiers: Tier[] = [
     name: "Free",
     price: "$0",
     priceNote: "No card needed",
-    summary: "For a small team trying Revuu on a real board.",
+    summary: "For a small team trying Revuu on a real parts list.",
     cta: "Start free",
     includes: [
       "3 members",
       "2 active projects",
-      "200 BOM lines per revision",
-      "Weekly part data refresh",
-      "Release report with watermark",
+      "200 lines per parts list",
+      "Electrical and mechanical parts",
+      "Up to 3 alternates per part",
     ],
   },
   {
     name: "Team",
     price: "Per seat",
     priceNote: "Amount set before launch",
-    summary: "For teams that release boards every month.",
+    summary: "For teams that buy parts for new boards every month.",
     cta: "Start free",
     featured: true,
     includes: [
       "Unlimited projects",
-      "2,000 BOM lines per revision",
-      "Daily part data refresh",
+      "2,000 lines per parts list",
+      "Shared vendor records",
       "Approved Parts List (AVL)",
       "EOL and NRND alerts",
-      "Release report without watermark",
+      "Comparison export as CSV",
     ],
   },
   {
@@ -52,10 +52,9 @@ const tiers: Tier[] = [
     includes: [
       "Everything in Team",
       "SAML single sign-on",
-      "Custom checklist templates",
+      "Custom column mappings saved per tool",
       "Audit log export",
-      "Priority part data refresh",
-      "Your own Mouser and DigiKey keys",
+      "Custom lines per parts list",
     ],
   },
 ];
@@ -63,30 +62,32 @@ const tiers: Tier[] = [
 type Cell = boolean | string;
 const comparison: { group: string; rows: { label: string; values: [Cell, Cell, Cell] }[] }[] = [
   {
-    group: "Reviews",
+    group: "Import",
     rows: [
-      { label: "Schematic, PCB layout and parts reviews", values: [true, true, true] },
-      { label: "Sign-off gate", values: [true, true, true] },
-      { label: "Checklist templates", values: ["Built-in", "Built-in", "Custom"] },
+      { label: "CSV, XLSX and XLS parts lists", values: [true, true, true] },
+      { label: "Column mapping you confirm", values: [true, true, true] },
+      { label: "Lines per parts list", values: ["200", "2,000", "Custom"] },
+      { label: "Saved column mappings", values: [false, false, true] },
       { label: "Members", values: ["3", "Unlimited", "Unlimited"] },
       { label: "Active projects", values: ["2", "Unlimited", "Unlimited"] },
     ],
   },
   {
-    group: "Parts",
+    group: "Comparison",
     rows: [
-      { label: "BOM lines per revision", values: ["200", "2,000", "Custom"] },
-      { label: "Lifecycle, stock and price from DigiKey and Mouser", values: [true, true, true] },
-      { label: "Part data refresh", values: ["Weekly", "Daily", "Priority"] },
+      { label: "Electrical and mechanical alternates", values: [true, true, true] },
+      { label: "Alternates per part", values: ["3", "3", "3"] },
+      { label: "Unit-normalized spec differences", values: [true, true, true] },
+      { label: "Vendor contacts with source", values: [true, true, true] },
+      { label: "Shared vendor records", values: [false, true, true] },
       { label: "Approved Parts List (AVL)", values: [false, true, true] },
       { label: "EOL and NRND alerts", values: [false, true, true] },
-      { label: "LCSC data by CSV import", values: [true, true, true] },
     ],
   },
   {
-    group: "Release and security",
+    group: "Export and security",
     rows: [
-      { label: "Release report (PDF)", values: ["Watermarked", true, true] },
+      { label: "Comparison export (CSV)", values: [false, true, true] },
       { label: "Audit log", values: [true, true, true] },
       { label: "Audit log export", values: [false, false, true] },
       { label: "SAML single sign-on", values: [false, false, true] },
@@ -100,16 +101,16 @@ const faqs = [
     a: "Before public launch. Until then, every workspace runs on the Free limits, and we will tell you the price before anything is charged.",
   },
   {
-    q: "Where does part data come from?",
-    a: "DigiKey and Mouser through their official APIs, plus LCSC through CSV import. Every value shows its source and when Revuu last checked it.",
+    q: "Which files can we import?",
+    a: "CSV, XLSX and XLS parts lists, from Altium, KiCad, OrCAD or a mechanical spreadsheet. You confirm the columns before Revuu creates any part.",
   },
   {
-    q: "Do our distributor API keys leave your servers?",
-    a: "No. Revuu calls distributors from its servers only. On Business you can add your own Mouser and DigiKey keys, which stay encrypted on our side.",
+    q: "Where do vendor emails and phone numbers come from?",
+    a: "From your imported list first, then from the vendor record. Each one shows its source. Revuu never searches the web for contacts.",
   },
   {
     q: "Can we export our data?",
-    a: "Yes. BOMs, reviews and comments export as CSV, and each signed-off revision has a PDF release report.",
+    a: "Yes. Parts lists export as CSV on every plan, and comparisons export as CSV on Team and Business.",
   },
 ];
 
@@ -125,7 +126,7 @@ export function PricingPage() {
             Start free. Pay per seat when the team grows.
           </h1>
           <p className="text-body-lg text-ink-muted">
-            Free covers a real board review. Team and Business prices are set before launch, and you
+            Free covers a real parts list. Team and Business prices are set before launch, and you
             will see them before anything is charged.
           </p>
         </div>

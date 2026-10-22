@@ -6,7 +6,7 @@ for (const theme of ["light", "dark"] as const) {
     await setTheme(page, theme);
     await page.goto("/app");
     await expect(page.getByRole("heading", { level: 1, name: "Dashboard" })).toBeVisible();
-    await expect(page.getByRole("heading", { name: "Waiting on you" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Parts that need an alternate" })).toBeVisible();
     await expect(page.getByText("Demo workspace with sample data.")).toBeVisible();
     await expectNoHorizontalScroll(page);
     await expectNoAxeViolations(page);
@@ -21,10 +21,10 @@ test("Ctrl+K opens the command palette and Enter navigates", async ({ page, isMo
   const palette = page.getByRole("dialog", { name: "Command palette" });
   await expect(palette).toBeVisible();
   await page.keyboard.type("parts");
-  await expect(palette.getByRole("option")).toHaveCount(2);
+  await expect(palette.getByRole("option")).toHaveCount(3);
   await page.keyboard.press("Enter");
   await expect(page).toHaveURL(/\/app\/parts$/);
-  await expect(page.getByRole("heading", { name: "Parts arrive in M3" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "No parts list yet." })).toBeVisible();
   await expect(page.getByRole("link", { name: "Parts", exact: true })).toHaveAttribute(
     "aria-current",
     "page",
@@ -38,6 +38,10 @@ test("placeholder sections render and unknown sections 404", async ({ page }) =>
   ).toBeVisible();
   await expectNoAxeViolations(page);
   // The app shell streams first, so Next keeps a 200 and marks the page noindex.
+  // The product is parts comparison; there is no review module.
+  await expect(page.getByRole("link", { name: "Reviews" })).toHaveCount(0);
+  await page.goto("/app/reviews");
+  await expect(page.getByRole("heading", { name: "This page doesn’t exist" })).toBeVisible();
   await page.goto("/app/not-a-section");
   await expect(page.getByRole("heading", { name: "This page doesn’t exist" })).toBeVisible();
   await expect(page.locator('meta[name="robots"]').first()).toHaveAttribute("content", /noindex/);

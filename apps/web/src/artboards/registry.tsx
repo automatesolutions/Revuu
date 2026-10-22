@@ -1,6 +1,13 @@
 import { AppShellArtboard } from "./screens/app-shell";
 import { DashboardArtboard } from "./screens/dashboard";
 import { MarketingHomeArtboard } from "./screens/marketing-home";
+import {
+  PartsCompareArtboard,
+  PartsImportArtboard,
+  PartsTableArtboard,
+  partsCompareStates,
+  partsImportStates,
+} from "./screens/parts";
 import { PricingArtboard } from "./screens/pricing";
 import { dashboardStates } from "@/screens/app/dashboard";
 
@@ -19,7 +26,8 @@ export const artboards: Artboard[] = [
     id: "marketing-home",
     title: "Marketing home",
     mode: "persuade",
-    brief: "Show an engineer what a Revuu review looks like, then get them to start free.",
+    brief:
+      "Show an engineer a parts list compared with its alternates, then get them to start free.",
     states: ["default"],
     render: () => <MarketingHomeArtboard />,
   },
@@ -43,9 +51,34 @@ export const artboards: Artboard[] = [
     id: "dashboard",
     title: "Dashboard",
     mode: "operate",
-    brief: "Show what is waiting on me and which parts changed, before anything else.",
+    brief:
+      "Show which parts need an alternate and which parts lists changed, before anything else.",
     states: dashboardStates,
     render: (state) => <DashboardArtboard state={state} />,
+  },
+  {
+    id: "parts-import",
+    title: "Parts import and column mapping",
+    mode: "operate",
+    brief: "Get a CSV or Excel parts list in, and confirm its columns before any part exists.",
+    states: partsImportStates,
+    render: (state) => <PartsImportArtboard state={state} />,
+  },
+  {
+    id: "parts-table",
+    title: "Parts table",
+    mode: "operate",
+    brief: "Show every imported electrical and mechanical part, and open one to compare.",
+    states: ["default"],
+    render: () => <PartsTableArtboard />,
+  },
+  {
+    id: "parts-compare",
+    title: "Alternate comparison",
+    mode: "operate",
+    brief: "Show a part beside up to three alternates, with every spec difference marked.",
+    states: partsCompareStates,
+    render: (state) => <PartsCompareArtboard state={state} />,
   },
 ];
 

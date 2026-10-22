@@ -12,13 +12,11 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { currentUser, workspace } from "@/fixtures/dashboard";
 import { CommandPalette } from "./command-palette";
 
-export type AppSection =
-  "dashboard" | "projects" | "reviews" | "parts" | "avl" | "integrations" | "settings";
+export type AppSection = "dashboard" | "projects" | "parts" | "avl" | "integrations" | "settings";
 
 const primaryNav: { id: AppSection; label: string; icon: IconName; href: string }[] = [
   { id: "dashboard", label: "Dashboard", icon: "layout-dashboard", href: "/app" },
   { id: "projects", label: "Projects", icon: "folder-kanban", href: "/app/projects" },
-  { id: "reviews", label: "Reviews", icon: "list-checks", href: "/app/reviews" },
   { id: "parts", label: "Parts", icon: "package", href: "/app/parts" },
   { id: "avl", label: "Approved Parts List", icon: "shield-check", href: "/app/avl" },
 ];
@@ -40,7 +38,6 @@ export function AppShell({
   title: titleProp,
   children,
   paletteOpen: paletteOpenProp = false,
-  reviewCount = 3,
   notice,
 }: {
   notice?: string;
@@ -48,7 +45,6 @@ export function AppShell({
   current?: AppSection;
   title?: string;
   children: React.ReactNode;
-  reviewCount?: number;
   /** Opens the palette on first render, for artboards. */
   paletteOpen?: boolean;
 }) {
@@ -87,7 +83,7 @@ export function AppShell({
       </a>
 
       <aside className="sticky top-0 hidden h-dvh border-r border-hairline bg-surface lg:block">
-        <Sidebar current={current} reviewCount={reviewCount} />
+        <Sidebar current={current} />
       </aside>
 
       <dialog
@@ -107,11 +103,7 @@ export function AppShell({
             className="size-11"
           />
         </div>
-        <Sidebar
-          current={current}
-          reviewCount={reviewCount}
-          onNavigate={() => setDrawerOpen(false)}
-        />
+        <Sidebar current={current} onNavigate={() => setDrawerOpen(false)} />
       </dialog>
 
       <div className="flex min-w-0 flex-col">
@@ -165,15 +157,7 @@ export function AppShell({
   );
 }
 
-function Sidebar({
-  current,
-  reviewCount,
-  onNavigate,
-}: {
-  current: AppSection;
-  reviewCount: number;
-  onNavigate?: () => void;
-}) {
+function Sidebar({ current, onNavigate }: { current: AppSection; onNavigate?: () => void }) {
   return (
     <div className="flex h-full flex-col gap-6 px-3 py-3">
       <button
@@ -191,13 +175,7 @@ function Sidebar({
 
       <nav aria-label="Workspace" className="grid gap-0.5">
         {primaryNav.map((item) => (
-          <NavLink
-            key={item.id}
-            {...item}
-            count={item.id === "reviews" ? reviewCount : undefined}
-            active={current === item.id}
-            onNavigate={onNavigate}
-          />
+          <NavLink key={item.id} {...item} active={current === item.id} onNavigate={onNavigate} />
         ))}
       </nav>
 
@@ -214,14 +192,12 @@ function NavLink({
   label,
   icon,
   href,
-  count,
   active,
   onNavigate,
 }: {
   label: string;
   icon: IconName;
   href: string;
-  count?: number;
   active: boolean;
   onNavigate?: () => void;
 }) {
@@ -239,12 +215,6 @@ function NavLink({
     >
       <Icon name={icon} className={active ? "text-ink" : "text-ink-subtle"} />
       <span className="flex-1 truncate">{label}</span>
-      {count ? (
-        <span className="rounded-xs bg-sunken px-1.5 text-caption text-ink-muted tabular-nums">
-          {count}
-          <span className="sr-only"> waiting on you</span>
-        </span>
-      ) : null}
     </Link>
   );
 }

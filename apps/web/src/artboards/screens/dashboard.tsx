@@ -6,7 +6,7 @@ export function DashboardArtboard({ state }: { state: string }) {
     ? (state as DashboardState)
     : "default";
   return (
-    <AppShell current="dashboard" title="Dashboard" reviewCount={valid === "empty" ? 0 : 3}>
+    <AppShell current="dashboard" title="Dashboard">
       <Dashboard state={valid} />
     </AppShell>
   );

@@ -29,14 +29,14 @@ const statuses: Status[] = [
 ];
 
 const typeScale = [
-  { token: "display-lg", sample: "Review the board" },
-  { token: "headline", sample: "Rev C is ready for sign-off" },
+  { token: "display-lg", sample: "Compare every part" },
+  { token: "headline", sample: "3 alternates for Q3" },
   { token: "page-title", sample: "Power board, Rev C" },
-  { token: "title", sample: "Parts review" },
-  { token: "body-lg", sample: "Every line on the BOM gets checked before release." },
-  { token: "body", sample: "Three reviewers signed off. One line is still open." },
-  { token: "body-sm", sample: "Lifecycle from DigiKey, checked 2 h ago." },
-  { token: "ui", sample: "Assign reviewer" },
+  { token: "title", sample: "Alternates side by side" },
+  { token: "body-lg", sample: "Every part on the list gets compared before you order." },
+  { token: "body", sample: "Two specs differ from the baseline. Confirm the load current." },
+  { token: "body-sm", sample: "Lifecycle from the vendor record, 1 d ago." },
+  { token: "ui", sample: "Find alternates" },
   { token: "caption", sample: "Last synced 09:41" },
 ] as const;
 
@@ -138,10 +138,10 @@ export default function DesignSystemPage() {
         <Section id="buttons" title="Buttons">
           <div className="grid gap-4">
             <div className="flex flex-wrap items-center gap-3">
-              <Button variant="primary" icon="file-check">
-                Sign off revision
+              <Button variant="primary" icon="replace">
+                Find alternates
               </Button>
-              <Button>Assign reviewer</Button>
+              <Button>Choose another file</Button>
               <Button variant="accent" icon="upload">
                 Upload BOM
               </Button>
@@ -155,7 +155,7 @@ export default function DesignSystemPage() {
               <Button size="sm">Small</Button>
               <Button size="md">Medium</Button>
               <Button size="lg" variant="primary">
-                Start a review
+                Start free
               </Button>
               <Button loading>Syncing parts</Button>
               <Button disabled>Disabled</Button>
@@ -167,7 +167,7 @@ export default function DesignSystemPage() {
 
         <Section id="fields" title="Fields">
           <div className="grid max-w-3xl gap-5 md:grid-cols-2">
-            <Field label="Revision name" hint="Shown on the release report.">
+            <Field label="Revision name" hint="Shown on the parts list.">
               {({ id, describedBy, invalid }) => (
                 <Input
                   id={id}
@@ -179,7 +179,7 @@ export default function DesignSystemPage() {
             </Field>
             <Field
               label="Manufacturer part number"
-              error="No match at Mouser or DigiKey. Check the MPN for typos."
+              error="No part record matches this MPN. Check it for typos."
             >
               {({ id, describedBy, invalid }) => (
                 <Input
@@ -191,20 +191,19 @@ export default function DesignSystemPage() {
                 />
               )}
             </Field>
-            <Field label="Review type">
+            <Field label="Category">
               {({ id }) => (
-                <Select id={id} defaultValue="parts">
-                  <option value="schematic">Schematic</option>
-                  <option value="layout">PCB layout</option>
-                  <option value="parts">Parts</option>
+                <Select id={id} defaultValue="electrical">
+                  <option value="electrical">Electrical</option>
+                  <option value="mechanical">Mechanical</option>
                 </Select>
               )}
             </Field>
             <Field label="Disabled">
-              {({ id }) => <Input id={id} disabled defaultValue="Locked after sign-off" />}
+              {({ id }) => <Input id={id} disabled defaultValue="Locked after import" />}
             </Field>
             <Field label="Comment" className="md:col-span-2">
-              {({ id }) => <Textarea id={id} placeholder="What should the designer change?" />}
+              {({ id }) => <Textarea id={id} placeholder="Why was this alternate rejected?" />}
             </Field>
           </div>
         </Section>
@@ -213,22 +212,22 @@ export default function DesignSystemPage() {
           <div className="grid gap-4 md:grid-cols-3">
             <Card>
               <CardHeader
-                title="Parts review"
-                description="Rev C, 42 lines"
+                title="Power board Rev C"
+                description="12 lines, 11 parts"
                 action={<StatusChip status="pending" size="sm" />}
               />
               <div className="flex items-center justify-between">
                 <AvatarStack names={["Mara Lin", "Theo Okafor", "Ana Reyes", "Sam Patel"]} />
-                <span className="text-ui text-ink-muted tabular-nums">3 of 4 signed</span>
+                <span className="text-ui text-ink-muted tabular-nums">3 need an alternate</span>
               </div>
             </Card>
             <Card className="bg-block-fr4 shadow-none">
               <CardHeader
-                title="Schematic review"
-                description="Rev C, 6 sheets"
+                title="DMP2035U-7"
+                description="Alternate for Q3"
                 action={<StatusChip status="approved" size="sm" />}
               />
-              <p className="text-ink-muted">Signed off by Mara Lin, 14:02.</p>
+              <p className="text-ink-muted">Approved for the AVL by Mara Lin, 14:02.</p>
             </Card>
             <Card>
               <CardHeader title="Avatars" />
@@ -245,11 +244,11 @@ export default function DesignSystemPage() {
         <Section id="states" title="Empty, loading and error">
           <div className="grid gap-4 lg:grid-cols-3">
             <EmptyState
-              title="No BOM yet"
-              description="Upload a CSV or XLSX export from your EDA tool. Revuu maps the columns and checks every line."
+              title="No parts list yet."
+              description="Import a CSV or Excel file. You confirm the columns before Revuu creates any part."
               action={
                 <Button variant="primary" icon="upload">
-                  Upload BOM
+                  Import parts list
                 </Button>
               }
             />

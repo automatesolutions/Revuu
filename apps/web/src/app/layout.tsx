@@ -7,11 +7,11 @@ import "./globals.css";
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
   title: {
-    default: "Revuu: design review and sign-off for hardware teams",
+    default: "Revuu: BOM import and alternate part comparison",
     template: "%s · Revuu",
   },
   description:
-    "Schematic, PCB layout and parts reviews with live distributor data and a sign-off gate, for electronics teams that release on a schedule.",
+    "Import a CSV or Excel parts list and compare every electrical and mechanical part with its alternates, spec by spec.",
   applicationName: "Revuu",
 };
 

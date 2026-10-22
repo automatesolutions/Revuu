@@ -5,8 +5,8 @@ import { PlaceholderPage } from "@/screens/app/placeholder-page";
 export function AppShellArtboard({ state }: { state: string }) {
   if (state === "placeholder-page") {
     return (
-      <AppShell current="parts" title="Parts">
-        <PlaceholderPage section="parts" />
+      <AppShell current="avl" title="Approved Parts List">
+        <PlaceholderPage section="avl" />
       </AppShell>
     );
   }

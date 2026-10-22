@@ -7,7 +7,7 @@ import { LifecycleBadge, StatusChip } from "@revuu/ui/components/status-chip";
 import { cn } from "@revuu/ui/lib/cn";
 import { EmptyBoardIllustration } from "@/components/illustrations";
 import { LinkButton } from "@/components/link-button";
-import { activity, assignments, partAlerts, revisions } from "@/fixtures/dashboard";
+import { activity, needsAlternate, partAlerts, partsLists } from "@/fixtures/dashboard";
 
 export const dashboardStates = ["default", "empty", "loading", "error", "stale"] as const;
 export type DashboardState = (typeof dashboardStates)[number];
@@ -22,30 +22,20 @@ export function Dashboard({ state = "default" }: { state?: DashboardState }) {
           <h1 className="text-page-title">Dashboard</h1>
           <p className="text-body-sm text-ink-muted">
             {state === "empty"
-              ? "Nothing to review yet."
+              ? "No parts list yet."
               : state === "default" || state === "stale"
-                ? "3 reviews are waiting on you. 3 parts changed lifecycle this week."
-                : "\u00a0"}
+                ? "3 parts need an alternate. 3 parts changed lifecycle this week."
+                : " "}
           </p>
         </div>
         {state === "loading" ? (
-          <div className="flex gap-2">
-            <Button icon="upload" disabled>
-              Import BOM
-            </Button>
-            <Button variant="primary" icon="plus" disabled>
-              New project
-            </Button>
-          </div>
+          <Button variant="primary" icon="upload" disabled>
+            Import parts list
+          </Button>
         ) : state !== "empty" ? (
-          <div className="flex gap-2">
-            <LinkButton href="/app/projects" icon="upload">
-              Import BOM
-            </LinkButton>
-            <LinkButton href="/app/projects" variant="primary" icon="plus">
-              New project
-            </LinkButton>
-          </div>
+          <LinkButton href="/app/parts" variant="primary" icon="upload">
+            Import parts list
+          </LinkButton>
         ) : null}
       </div>
 
@@ -53,8 +43,9 @@ export function Dashboard({ state = "default" }: { state?: DashboardState }) {
       {state === "loading" ? <DashboardLoading /> : null}
       {state === "error" ? (
         <ErrorState
+          headingLevel="h2"
           title="The dashboard didn't load"
-          description="Revuu lost contact with the workspace database. Your reviews and sign-offs are safe. Revuu retries in 30 seconds."
+          description="Revuu lost contact with the workspace database. Your parts lists are safe. Revuu retries in 30 seconds."
           detail="503 · request 4c1e7a · 09:41"
           action={
             <Button size="sm" icon="refresh-cw">
@@ -74,67 +65,64 @@ function DashboardContent({ stale }: { stale: boolean }) {
   return (
     <div className="grid grid-cols-[minmax(0,1fr)] gap-6 xl:grid-cols-[minmax(0,1fr)_22rem]">
       <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] content-start gap-6">
-        <section aria-labelledby="waiting-title" className={panel}>
+        <section aria-labelledby="alternates-title" className={panel}>
           <PanelHeader
-            id="waiting-title"
-            title="Waiting on you"
-            meta={`${assignments.length} reviews`}
+            id="alternates-title"
+            title="Parts that need an alternate"
+            meta={`${needsAlternate.length} parts`}
           />
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[40rem] text-ui">
+            <table className="w-full min-w-[42rem] text-ui">
               <thead>
                 <tr className="border-y border-hairline bg-surface text-left text-caption text-ink-muted">
                   <th scope="col" className="h-8 px-4 font-semibold">
-                    Review
+                    Part
                   </th>
                   <th scope="col" className="h-8 px-3 font-semibold">
-                    Requested by
+                    Lifecycle
                   </th>
                   <th scope="col" className="h-8 px-3 font-semibold">
-                    Due
+                    Parts list
                   </th>
-                  <th scope="col" className="h-8 px-3 text-right font-semibold">
-                    Open items
-                  </th>
-                  <th scope="col" className="h-8 px-4 font-semibold">
-                    Status
+                  <th scope="col" className="h-8 px-4 text-right font-semibold">
+                    Alternates
                   </th>
                 </tr>
               </thead>
               <tbody>
-                {assignments.map((a) => (
+                {needsAlternate.map((row) => (
                   <tr
-                    key={a.id}
+                    key={row.id}
                     className="border-b border-hairline last:border-0 hover:bg-surface"
                   >
-                    <td className="h-12 px-4">
-                      <Link href="/app/reviews" className="grid hover:underline">
-                        <span className="font-semibold text-ink">{a.review}</span>
-                        <span className="text-[0.75rem] text-ink-subtle">
-                          {a.project} · {a.revision}
+                    <th scope="row" className="h-12 px-4 text-left font-normal">
+                      <Link href="/app/parts" className="grid hover:underline">
+                        <span className="mpn font-semibold text-ink">
+                          {row.designator} · {row.mpn}
                         </span>
+                        <span className="text-[0.75rem] text-ink-subtle">{row.manufacturer}</span>
                       </Link>
-                    </td>
+                    </th>
                     <td className="px-3">
-                      <span className="flex items-center gap-2">
-                        <Avatar name={a.requestedBy} size="sm" />
-                        {a.requestedBy}
-                      </span>
+                      <LifecycleBadge
+                        lifecycle={row.lifecycle}
+                        source="Vendor record"
+                        age={row.age}
+                        size="sm"
+                      />
                     </td>
-                    <td className="px-3">
-                      <span
-                        className={cn(
-                          "inline-flex items-center gap-1.5",
-                          a.overdue && "font-semibold text-status-rejected",
-                        )}
-                      >
-                        {a.overdue ? <Icon name="clock" className="size-3.5" /> : null}
-                        {a.overdue ? `Overdue, was due ${a.due.toLowerCase()}` : a.due}
-                      </span>
-                    </td>
-                    <td className="px-3 text-right tabular-nums">{a.openItems}</td>
-                    <td className="px-4">
-                      <StatusChip status={a.status} size="sm" />
+                    <td className="px-3 text-ink-muted">{row.list}</td>
+                    <td className="px-4 text-right tabular-nums">
+                      {row.alternates ? (
+                        <Link
+                          href="/app/parts"
+                          className="font-semibold text-accent hover:underline"
+                        >
+                          Compare {row.alternates}
+                        </Link>
+                      ) : (
+                        <span className="text-ink-subtle">None on record</span>
+                      )}
                     </td>
                   </tr>
                 ))}
@@ -143,70 +131,69 @@ function DashboardContent({ stale }: { stale: boolean }) {
           </div>
         </section>
 
-        <section aria-labelledby="revisions-title" className={panel}>
+        <section aria-labelledby="lists-title" className={panel}>
           <PanelHeader
-            id="revisions-title"
-            title="Revisions in progress"
-            meta="4 revisions"
+            id="lists-title"
+            title="Parts lists"
+            meta={`${partsLists.length} lists`}
             action={
-              <Link
-                href="/app/projects"
-                className="text-ui font-semibold text-accent hover:underline"
-              >
-                All projects
+              <Link href="/app/parts" className="text-ui font-semibold text-accent hover:underline">
+                Open parts
               </Link>
             }
           />
-          <div className="overflow-x-auto">
+          <div role="region" aria-labelledby="lists-title" tabIndex={0} className="overflow-x-auto">
             <table className="w-full min-w-[44rem] text-ui">
               <thead>
                 <tr className="border-y border-hairline bg-surface text-left text-caption text-ink-muted">
                   <th scope="col" className="h-8 px-4 font-semibold">
-                    Revision
+                    List
                   </th>
-                  <th scope="col" className="h-8 px-3 font-semibold">
-                    Schematic
+                  <th scope="col" className="h-8 px-3 text-right font-semibold">
+                    Electrical
                   </th>
-                  <th scope="col" className="h-8 px-3 font-semibold">
-                    PCB layout
+                  <th scope="col" className="h-8 px-3 text-right font-semibold">
+                    Mechanical
                   </th>
-                  <th scope="col" className="h-8 px-3 font-semibold">
-                    Parts
+                  <th scope="col" className="h-8 px-3 text-right font-semibold">
+                    Skipped
                   </th>
-                  <th scope="col" className="h-8 px-3 font-semibold">
-                    Sign-off
+                  <th scope="col" className="h-8 px-3 text-right font-semibold">
+                    Need an alternate
                   </th>
                   <th scope="col" className="h-8 px-4 text-right font-semibold">
-                    Updated
+                    Imported
                   </th>
                 </tr>
               </thead>
               <tbody>
-                {revisions.map((r) => (
+                {partsLists.map((list) => (
                   <tr
-                    key={r.id}
+                    key={list.id}
                     className="border-b border-hairline last:border-0 hover:bg-surface"
                   >
-                    <th scope="row" className="h-10 px-4 text-left font-semibold">
-                      <Link href="/app/projects" className="hover:underline">
-                        {r.project}{" "}
-                        <span className="mpn font-normal text-ink-muted">{r.revision}</span>
-                      </Link>
+                    <th scope="row" className="h-12 px-4 text-left font-normal">
+                      <span className="grid">
+                        <span className="font-semibold text-ink">{list.name}</span>
+                        <span className="mpn text-[0.75rem] text-ink-subtle">{list.file}</span>
+                      </span>
                     </th>
-                    <td className="px-3">
-                      <StatusChip status={r.schematic} size="sm" />
+                    <td className="px-3 text-right tabular-nums">{list.electrical}</td>
+                    <td className="px-3 text-right tabular-nums">{list.mechanical}</td>
+                    <td className="px-3 text-right tabular-nums">
+                      {list.skipped ? list.skipped : <span className="text-ink-subtle">0</span>}
                     </td>
-                    <td className="px-3">
-                      <StatusChip status={r.layout} size="sm" />
-                    </td>
-                    <td className="px-3">
-                      <StatusChip status={r.parts} size="sm" />
-                    </td>
-                    <td className="px-3">
-                      <StatusChip status={r.signoff} size="sm" />
+                    <td className="px-3 text-right tabular-nums">
+                      {list.needAlternate ? (
+                        <StatusChip status="warning" size="sm">
+                          {list.needAlternate}
+                        </StatusChip>
+                      ) : (
+                        <span className="text-ink-subtle">0</span>
+                      )}
                     </td>
                     <td className="px-4 text-right whitespace-nowrap text-ink-subtle">
-                      {r.updated}
+                      {list.imported}
                     </td>
                   </tr>
                 ))}
@@ -218,7 +205,7 @@ function DashboardContent({ stale }: { stale: boolean }) {
 
       <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] content-start gap-6">
         <section aria-labelledby="alerts-title" className={panel}>
-          <PanelHeader id="alerts-title" title="Part alerts" meta="This week" />
+          <PanelHeader id="alerts-title" title="Lifecycle changes" meta="This week" />
           {stale ? (
             <div className="px-4 pb-3">
               <p
@@ -226,7 +213,8 @@ function DashboardContent({ stale }: { stale: boolean }) {
                 className="flex items-start gap-2 rounded-md bg-status-warning-bg px-3 py-2 text-caption font-medium text-status-warning"
               >
                 <Icon name="wifi-off" className="mt-px size-3.5" />
-                DigiKey didn’t respond. Lifecycle below is from 06:40. Revuu retries in 2 minutes.
+                Vendor records didn’t refresh. Lifecycle below is from 06:40. Revuu retries in 2
+                minutes.
               </p>
             </div>
           ) : null}
@@ -236,7 +224,7 @@ function DashboardContent({ stale }: { stale: boolean }) {
                 <div className="flex items-center justify-between gap-2">
                   <span className="truncate mpn">{alert.mpn}</span>
                   <span className="text-caption font-medium whitespace-nowrap text-ink-subtle">
-                    {alert.revisions} {alert.revisions === 1 ? "revision" : "revisions"}
+                    In {alert.lists} {alert.lists === 1 ? "list" : "lists"}
                   </span>
                 </div>
                 <div className="flex flex-wrap items-center gap-1.5">
@@ -310,17 +298,18 @@ function PanelHeader({
 function DashboardEmpty() {
   return (
     <EmptyState
+      headingLevel="h2"
       className="py-16"
       illustration={<EmptyBoardIllustration className="h-24 w-auto" />}
-      title="Start with a project"
-      description="A project holds every revision of one board. Create one, then import its BOM to start the first review."
+      title="Start with a parts list"
+      description="Import a CSV or Excel parts list. Revuu lines up each electrical and mechanical part with its alternates."
       action={
         <div className="grid justify-items-center gap-3">
-          <LinkButton href="/app/projects" variant="primary" icon="plus">
-            New project
+          <LinkButton href="/app/parts" variant="primary" icon="upload">
+            Import parts list
           </LinkButton>
           <LinkButton href="/#how-it-works" variant="link" size="sm">
-            See a sample review
+            See a sample comparison
           </LinkButton>
         </div>
       }

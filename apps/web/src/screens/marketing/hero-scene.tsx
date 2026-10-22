@@ -2,27 +2,26 @@
 
 import { useEffect, useRef } from "react";
 import { loadGsap } from "@/lib/gsap";
-import { AvatarStack, Avatar } from "@revuu/ui/components/avatar";
 import { Icon } from "@revuu/ui/components/icon";
 import { LifecycleBadge, StatusChip } from "@revuu/ui/components/status-chip";
 import { cn } from "@revuu/ui/lib/cn";
 
 const steps = [
   {
-    title: "Import the BOM",
-    body: "Drop in a CSV or XLSX export from Altium, KiCad or OrCAD. Revuu maps the columns for you to confirm.",
+    title: "Import the parts list",
+    body: "Drop in a CSV or Excel export from Altium, KiCad, OrCAD or your mechanical spreadsheet.",
   },
   {
-    title: "Check every line",
-    body: "Lifecycle, stock and price from DigiKey and Mouser, with the source and age next to each value.",
+    title: "Confirm the columns",
+    body: "Revuu guesses each column from its header. No part exists until you confirm.",
   },
   {
-    title: "Run the reviews",
-    body: "Schematic, layout and parts checklists, each with a named reviewer. An EOL part gets an alternate before anyone signs.",
+    title: "Compare alternates",
+    body: "Up to three alternates per part, spec by spec. Every difference is marked, and each alternate is Drop-in or Functional.",
   },
   {
-    title: "Sign off the revision",
-    body: "The gate opens when every review is approved. Revuu writes the release report from the record.",
+    title: "Contact the vendor",
+    body: "Email, phone and URL with their source, only where your list or the vendor record has them.",
   },
 ];
 
@@ -34,11 +33,18 @@ const lines = [
   { refs: "R4, R9", mpn: "RC0402FR-0710KL", lifecycle: "active", avl: "approved" },
 ] as const;
 
-const reviews = [
-  { name: "Schematic review", reviewer: "Mara Lin", detail: "24 of 24 checklist items" },
-  { name: "PCB layout review", reviewer: "Theo Okafor", detail: "31 of 31 checklist items" },
-  { name: "Parts review", reviewer: "Ana Reyes", detail: "42 BOM lines checked" },
+const alternates = [
+  { mpn: "DMP2035U-7", maker: "Diodes Inc.", detail: "2 specs differ" },
+  { mpn: "SI2343CDS-T1-GE3", maker: "Vishay", detail: "3 specs differ" },
+  { mpn: "AO3401A", maker: "Alpha & Omega", detail: "3 specs differ" },
 ];
+
+const fitTag = (
+  <span className="inline-flex h-5 items-center gap-1 rounded-xs bg-raised px-1.5 text-[0.75rem] font-semibold whitespace-nowrap text-ink shadow-[inset_0_0_0_1px_var(--color-hairline-strong)]">
+    <Icon name="check" className="size-3" />
+    Drop-in
+  </span>
+);
 
 /** Two layers in one grid cell. The "after" layer is the default, so no-JS and reduced motion see the final state. */
 function Swap({
@@ -136,8 +142,8 @@ export function HeroScene() {
         tl.to(q('[data-hs-reveal="eol"]'), { autoAlpha: 1, y: 0, duration: 0.3 }, 1.4);
         swap(tl, "alternate", 2.1);
         tl.to(q('[data-hs-reveal="eol"]'), { autoAlpha: 0, duration: 0.2 }, 2.1);
-        swap(tl, "review", 2.4);
-        swap(tl, "gate", 3.1);
+        swap(tl, "fit", 2.4);
+        swap(tl, "vendor", 3.1);
         tl.to(q('[data-hs-reveal="report"]'), { autoAlpha: 1, y: 0, duration: 0.3 }, 3.3);
         tl.to({}, { duration: 0.6 });
 
@@ -159,7 +165,7 @@ export function HeroScene() {
         <div className="mx-auto grid w-full max-w-wide grid-cols-[minmax(0,1fr)] gap-10 px-6 py-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,2.1fr)] lg:items-center lg:gap-16 lg:px-12">
           <ol
             className="order-2 grid content-center gap-1 lg:order-1"
-            aria-label="How a revision moves through Revuu"
+            aria-label="How a parts list moves through Revuu"
           >
             {steps.map((step, i) => (
               <li
@@ -187,7 +193,7 @@ export function HeroScene() {
 
           <figure
             className="order-1 lg:order-2"
-            aria-label="Revuu showing Rev C of a power board with its BOM, reviews and sign-off"
+            aria-label="Revuu showing the Rev C power board parts list, alternates for Q3 and the vendor contact"
           >
             <div className="overflow-hidden rounded-lg bg-raised shadow-[0_0_0_1px_var(--color-hairline),0_24px_48px_-24px_rgb(15_17_21/0.25)]">
               <div className="flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-hairline bg-surface px-4 py-3">
@@ -196,9 +202,7 @@ export function HeroScene() {
                   <span className="text-[0.9375rem] font-bold">Power board</span>
                   <span className="mpn text-ink-muted">Rev C</span>
                 </div>
-                <div className="ml-auto flex items-center gap-3">
-                  <AvatarStack names={["Mara Lin", "Theo Okafor", "Ana Reyes"]} />
-                </div>
+                <span className="ml-auto text-caption font-medium text-ink-subtle">Demo data</span>
               </div>
 
               <div className="grid lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
@@ -207,7 +211,7 @@ export function HeroScene() {
                     <p className="text-label">BOM lines</p>
                     <p className="flex items-center gap-1.5 text-caption font-medium text-ink-subtle">
                       <Icon name="file-spreadsheet" className="size-3.5" />
-                      power-board-revC.csv
+                      power-board-rev-c.xlsx
                     </p>
                   </div>
                   <table className="w-full text-ui">
@@ -281,58 +285,49 @@ export function HeroScene() {
                     </tbody>
                   </table>
                   <p className="px-4 py-3 text-caption font-medium text-ink-subtle">
-                    6 of 42 lines · Lifecycle from DigiKey and Mouser, checked 2 h ago
+                    6 of 12 lines · Lifecycle from vendor records, 1 d ago
                   </p>
                 </div>
 
                 <div className="grid content-start gap-4 p-4">
-                  <p className="text-label">Reviews</p>
+                  <p className="text-label">
+                    Alternates for <span className="mpn">IRLML6402TRPBF</span>
+                  </p>
                   <ul className="grid gap-2">
-                    {reviews.map((review) => (
+                    {alternates.map((alt) => (
                       <li
-                        key={review.name}
+                        key={alt.mpn}
                         className="flex items-center gap-3 rounded-md bg-canvas px-3 py-2.5"
                       >
-                        <Avatar name={review.reviewer} size="sm" />
                         <div className="grid min-w-0 flex-1">
-                          <span className="truncate text-ui font-semibold">{review.name}</span>
+                          <span className="truncate mpn font-semibold">{alt.mpn}</span>
                           <span className="truncate text-[0.75rem] text-ink-subtle">
-                            {review.reviewer}
+                            {alt.maker} · {alt.detail}
                           </span>
-                          <span className="sr-only">{review.detail}</span>
                         </div>
-                        <Swap
-                          group="review"
-                          before={<StatusChip status="pending" size="sm" />}
-                          after={<StatusChip status="approved" size="sm" />}
-                        />
+                        <Swap group="fit" before={checking} after={fitTag} />
                       </li>
                     ))}
                   </ul>
 
-                  <div className="grid gap-3 rounded-md bg-block-copper p-3">
+                  <div className="grid gap-3 rounded-md bg-block-fr4 p-3">
                     <Swap
-                      group="gate"
+                      group="vendor"
                       before={
-                        <span className="grid gap-2">
-                          <span className="flex items-center gap-1.5 text-ui font-semibold">
-                            <Icon name="circle-dashed" className="size-3.5 text-status-pending" />
-                            Waiting on 3 reviews
-                          </span>
-                          <span className="inline-flex h-8 items-center justify-center gap-1.5 rounded-md bg-raised text-ui font-semibold text-ink-muted shadow-[inset_0_0_0_1px_var(--color-hairline-strong)]">
-                            <Icon name="lock" className="size-3.5" />
-                            Sign off Rev C
-                          </span>
+                        <span className="flex items-center gap-1.5 text-ui font-semibold">
+                          <Icon name="circle-dashed" className="size-3.5 text-status-pending" />
+                          Pick an alternate to see its vendor
                         </span>
                       }
                       after={
-                        <span className="grid gap-2">
-                          <span className="flex items-center gap-1.5 text-ui font-semibold">
-                            <Icon name="check-circle" className="size-3.5 text-status-approved" />
-                            All 3 reviews approved
+                        <span className="grid gap-1">
+                          <span className="text-ui font-semibold">Diodes Inc.</span>
+                          <span className="flex items-center gap-1.5 text-ui">
+                            <Icon name="mail" className="size-3.5" />
+                            sales@diodes.example
                           </span>
-                          <span className="inline-flex h-8 items-center justify-center rounded-md bg-primary text-ui font-semibold text-on-primary">
-                            Sign off Rev C
+                          <span className="text-[0.75rem] text-ink-muted">
+                            From the imported list
                           </span>
                         </span>
                       }
@@ -343,14 +338,14 @@ export function HeroScene() {
                     data-hs-reveal="report"
                     className="flex items-center gap-2 text-ui text-ink-muted"
                   >
-                    <Icon name="file-text" className="size-4 text-ink" />
-                    Release report for Rev C, 14 pages
+                    <Icon name="differs" className="size-4 text-ink" />
+                    Specs compared after unit normalization
                   </p>
                 </div>
               </div>
             </div>
             <figcaption className="mt-3 text-caption font-medium text-ink-subtle">
-              Sample revision with demo data.
+              Sample parts list with demo data.
             </figcaption>
           </figure>
         </div>

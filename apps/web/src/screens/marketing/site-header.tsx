@@ -9,9 +9,10 @@ import { cn } from "@revuu/ui/lib/cn";
 import { LinkButton } from "@/components/link-button";
 
 const links = [
-  { href: "/#reviews", label: "Reviews" },
-  { href: "/#parts", label: "Parts data" },
-  { href: "/#signoff", label: "Sign-off" },
+  { href: "/#why", label: "Why Revuu" },
+  { href: "/#import", label: "Import" },
+  { href: "/#compare", label: "Comparison" },
+  { href: "/#vendors", label: "Vendor contacts" },
   { href: "/pricing", label: "Pricing" },
 ];
 

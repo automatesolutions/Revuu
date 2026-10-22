@@ -249,7 +249,9 @@ export function DataTable<Row>({
           <span className="sr-only" role="status" aria-live="polite">
             {visible.length} of {rows.length} rows shown
           </span>
-          {toolbar ? <div className="ml-auto flex items-center gap-2">{toolbar}</div> : null}
+          {toolbar ? (
+            <div className="ml-auto flex flex-wrap items-center gap-2">{toolbar}</div>
+          ) : null}
         </div>
       ) : null}
 

@@ -23,7 +23,6 @@ const commands: Command[] = [
     icon: "folder-kanban",
     href: "/app/projects",
   },
-  { id: "reviews", label: "Reviews", group: "Go to", icon: "list-checks", href: "/app/reviews" },
   { id: "parts", label: "Parts", group: "Go to", icon: "package", href: "/app/parts" },
   {
     id: "avl",
@@ -33,19 +32,12 @@ const commands: Command[] = [
     href: "/app/avl",
   },
   {
-    id: "new-project",
-    label: "New project",
-    group: "Actions",
-    icon: "plus",
-    href: "/app/projects",
-  },
-  {
-    id: "import-bom",
-    label: "Import BOM",
+    id: "import-parts",
+    label: "Import parts list",
     group: "Actions",
     icon: "upload",
-    href: "/app/projects",
-    hint: "CSV or XLSX",
+    href: "/app/parts",
+    hint: "CSV, XLSX or XLS",
   },
   { id: "settings", label: "Settings", group: "Actions", icon: "settings", href: "/app/settings" },
 ];
@@ -177,7 +169,7 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose: () =
       </div>
 
       <p className="border-t border-hairline px-4 py-2.5 text-caption font-medium text-ink-subtle">
-        Search for MPNs, projects and comments arrives with the parts module.
+        MPN search arrives in a later release. Open Parts to compare a line with its alternates.
       </p>
     </dialog>
   );

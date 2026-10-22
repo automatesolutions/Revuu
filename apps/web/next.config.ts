@@ -14,6 +14,11 @@ const nextConfig: NextConfig = {
   partialPrefetching: true,
   poweredByHeader: false,
   transpilePackages: ["@revuu/ui"],
+  // The demo parts list is read from disk by these route handlers.
+  outputFileTracingIncludes: {
+    "/api/parts/import": ["./src/fixtures/parts/*.{csv,xlsx}"],
+    "/api/parts/demo": ["./src/fixtures/parts/*.{csv,xlsx}"],
+  },
   // Standalone output needs symlinks, which Windows only allows with Developer Mode,
   // so it is enabled in the Docker build only.
   ...(process.env.NEXT_STANDALONE === "1"

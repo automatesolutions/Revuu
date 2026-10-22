@@ -35,9 +35,9 @@ export function OgMark({ size = 56 }: { size?: number }) {
 }
 
 const chips = [
-  { label: "Schematic", status: "Approved", fg: "#137137", bg: "#DDF3E4" },
-  { label: "PCB layout", status: "Approved", fg: "#137137", bg: "#DDF3E4" },
-  { label: "Parts", status: "2 EOL", fg: "#6235C2", bg: "#ECE5FB" },
+  { label: "IRLML6402TRPBF", status: "EOL", fg: "#6235C2", bg: "#ECE5FB" },
+  { label: "DMP2035U-7", status: "Drop-in", fg: "#0F1115", bg: "#ECE9E2" },
+  { label: "HSO-M3X12-BR-NI", status: "Functional", fg: "#0F1115", bg: "#ECE9E2" },
 ];
 
 /** Shared Open Graph card. Title is the only per-route variable. */
@@ -94,7 +94,9 @@ export function OgCard({ title, subtitle }: { title: string; subtitle: string })
           background: "#EFE6CC",
         }}
       >
-        <div style={{ fontSize: 22, color: "#4A4F59", marginBottom: 6 }}>Rev C reviews</div>
+        <div style={{ fontSize: 22, color: "#4A4F59", marginBottom: 6 }}>
+          Alternates, side by side
+        </div>
         {chips.map((chip) => (
           <div
             key={chip.label}

@@ -7,12 +7,15 @@ export function EmptyState({
   action,
   illustration,
   className,
+  headingLevel: Heading = "h3",
 }: {
   title: string;
   description: string;
   action?: React.ReactNode;
   illustration?: React.ReactNode;
   className?: string;
+  /** Match the page outline; defaults to h3 for states inside a panel. */
+  headingLevel?: "h2" | "h3";
 }) {
   return (
     <div
@@ -23,7 +26,7 @@ export function EmptyState({
     >
       {illustration}
       <div className="grid max-w-[44ch] gap-2">
-        <h3 className="text-title">{title}</h3>
+        <Heading className="text-title">{title}</Heading>
         <p className="text-body-sm text-ink-muted">{description}</p>
       </div>
       {action}
@@ -38,6 +41,7 @@ export function ErrorState({
   action,
   icon = "alert-octagon",
   className,
+  headingLevel: Heading = "h3",
 }: {
   title: string;
   description: string;
@@ -46,6 +50,8 @@ export function ErrorState({
   action?: React.ReactNode;
   icon?: IconName;
   className?: string;
+  /** Match the page outline; defaults to h3 for states inside a panel. */
+  headingLevel?: "h2" | "h3";
 }) {
   return (
     <div
@@ -58,7 +64,7 @@ export function ErrorState({
       <div className="flex items-start gap-3">
         <Icon name={icon} className="mt-0.5 size-5 text-status-rejected" />
         <div className="grid gap-1">
-          <h3 className="font-sans text-[0.9375rem] font-bold">{title}</h3>
+          <Heading className="font-sans text-[0.9375rem] font-bold">{title}</Heading>
           <p className="text-body-sm text-ink-muted">{description}</p>
           {detail ? <p className="mpn text-ink-subtle">{detail}</p> : null}
         </div>

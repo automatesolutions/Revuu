@@ -4,25 +4,13 @@ import { LinkButton } from "@/components/link-button";
 import type { AppSection } from "./app-shell";
 
 export const placeholderSections: Record<
-  Exclude<AppSection, "dashboard">,
+  Exclude<AppSection, "dashboard" | "parts">,
   { title: string; milestone: string; description: string }
 > = {
   projects: {
     title: "Projects",
     milestone: "M1",
-    description: "Projects hold every revision of a board, with its BOM, files and reviews.",
-  },
-  reviews: {
-    title: "Reviews",
-    milestone: "M2",
-    description:
-      "Schematic, PCB layout and parts reviews with checklists, comments and a named reviewer.",
-  },
-  parts: {
-    title: "Parts",
-    milestone: "M3",
-    description:
-      "Lifecycle, stock and price for every MPN from DigiKey and Mouser, with alternates.",
+    description: "Projects keep each board's parts lists together, one list per revision.",
   },
   avl: {
     title: "Approved Parts List",
@@ -32,7 +20,8 @@ export const placeholderSections: Record<
   integrations: {
     title: "Integrations",
     milestone: "M3",
-    description: "Distributor connections and LCSC CSV import. API keys stay on Revuu's servers.",
+    description:
+      "Vendor records for contacts, stock and price. Any API keys stay on Revuu's servers.",
   },
   settings: {
     title: "Settings",
@@ -41,7 +30,11 @@ export const placeholderSections: Record<
   },
 };
 
-export function PlaceholderPage({ section }: { section: Exclude<AppSection, "dashboard"> }) {
+export function PlaceholderPage({
+  section,
+}: {
+  section: Exclude<AppSection, "dashboard" | "parts">;
+}) {
   const page = placeholderSections[section];
   return (
     <div className="grid gap-6 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
