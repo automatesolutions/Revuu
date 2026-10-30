@@ -13,6 +13,9 @@ const nextConfig: NextConfig = {
   cacheComponents: true,
   partialPrefetching: true,
   poweredByHeader: false,
+  experimental: {
+    agentUpgrade: "security",
+  },
   transpilePackages: ["@revuu/ui"],
   // The demo parts list is read from disk by these route handlers.
   outputFileTracingIncludes: {
