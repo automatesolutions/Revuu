@@ -8,6 +8,19 @@ import { cn } from "@revuu/ui/lib/cn";
 import { EmptyBoardIllustration } from "@/components/illustrations";
 import { LinkButton } from "@/components/link-button";
 import { activity, needsAlternate, partAlerts, partsLists } from "@/fixtures/dashboard";
+import { findAlternates, findRecord, vendorRecords } from "@/fixtures/parts/records";
+import { compareAlternates, fits } from "@/lib/parts/compare";
+import { categoryLabel } from "@/lib/parts/types";
+import { FitTag } from "./parts/parts-ui";
+
+/** Open comparisons in the demo workspace, computed from the demo part records. */
+const openComparisons = ["IRLML6402TRPBF", "HSO-M3X10-BR-NI"].flatMap((mpn) => {
+  const record = findRecord(mpn);
+  const alternates = findAlternates(mpn);
+  return record && alternates.length
+    ? [compareAlternates(record, alternates, [], vendorRecords)]
+    : [];
+});
 
 export const dashboardStates = ["default", "empty", "loading", "error", "stale"] as const;
 export type DashboardState = (typeof dashboardStates)[number];
@@ -22,20 +35,25 @@ export function Dashboard({ state = "default" }: { state?: DashboardState }) {
           <h1 className="text-page-title">Dashboard</h1>
           <p className="text-body-sm text-ink-muted">
             {state === "empty"
-              ? "No parts list yet."
+              ? "No comparison yet."
               : state === "default" || state === "stale"
-                ? "3 parts need an alternate. 3 parts changed lifecycle this week."
+                ? `${openComparisons.length} comparisons open. ${needsAlternate.length} parts still need an alternate.`
                 : " "}
           </p>
         </div>
         {state === "loading" ? (
-          <Button variant="primary" icon="upload" disabled>
-            Import parts list
+          <Button variant="primary" icon="replace" disabled>
+            Compare parts
           </Button>
         ) : state !== "empty" ? (
-          <LinkButton href="/app/parts" variant="primary" icon="upload">
-            Import parts list
-          </LinkButton>
+          <div className="flex flex-wrap gap-2">
+            <LinkButton href="/app/parts" icon="upload">
+              Import parts list
+            </LinkButton>
+            <LinkButton href="/app/parts/new" variant="primary" icon="replace">
+              Compare parts
+            </LinkButton>
+          </div>
         ) : null}
       </div>
 
@@ -65,6 +83,74 @@ function DashboardContent({ stale }: { stale: boolean }) {
   return (
     <div className="grid grid-cols-[minmax(0,1fr)] gap-6 xl:grid-cols-[minmax(0,1fr)_22rem]">
       <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] content-start gap-6">
+        <section aria-labelledby="open-title" className={panel}>
+          <PanelHeader
+            id="open-title"
+            title="Open comparisons"
+            meta={`${openComparisons.length} comparisons`}
+            action={
+              <Link
+                href="/app/parts/new"
+                className="text-ui font-semibold text-accent hover:underline"
+              >
+                Compare parts
+              </Link>
+            }
+          />
+          <div role="region" aria-labelledby="open-title" tabIndex={0} className="overflow-x-auto">
+            <table className="w-full min-w-[42rem] text-ui">
+              <thead>
+                <tr className="border-y border-hairline bg-surface text-left text-caption text-ink-muted">
+                  <th scope="col" className="h-8 px-4 font-semibold">
+                    Original
+                  </th>
+                  <th scope="col" className="h-8 px-3 font-semibold">
+                    Category
+                  </th>
+                  <th scope="col" className="h-8 px-3 font-semibold">
+                    Replacement judgement
+                  </th>
+                  <th scope="col" className="h-8 px-4 text-right font-semibold">
+                    Candidates
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {openComparisons.map(({ baseline, alternates }) => (
+                  <tr
+                    key={baseline.mpn}
+                    className="border-b border-hairline last:border-0 hover:bg-surface"
+                  >
+                    <th scope="row" className="h-12 px-4 text-left font-normal">
+                      <Link href="/app/parts" className="grid hover:underline">
+                        <span className="mpn font-semibold text-ink">{baseline.mpn}</span>
+                        <span className="text-[0.75rem] text-ink-subtle">
+                          {baseline.manufacturer}
+                        </span>
+                      </Link>
+                    </th>
+                    <td className="px-3 text-ink-muted">{categoryLabel[baseline.category]}</td>
+                    <td className="px-3">
+                      <span className="flex flex-wrap gap-1.5">
+                        {fits.map((fit) => {
+                          const count = alternates.filter((a) => a.fit === fit).length;
+                          return count ? (
+                            <span key={fit} className="inline-flex items-center gap-1">
+                              <FitTag fit={fit} />
+                              <span className="text-ink-muted tabular-nums">× {count}</span>
+                            </span>
+                          ) : null;
+                        })}
+                      </span>
+                    </td>
+                    <td className="px-4 text-right tabular-nums">{alternates.length}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+
         <section aria-labelledby="alternates-title" className={panel}>
           <PanelHeader
             id="alternates-title"
@@ -150,7 +236,7 @@ function DashboardContent({ stale }: { stale: boolean }) {
                     List
                   </th>
                   <th scope="col" className="h-8 px-3 text-right font-semibold">
-                    Electrical
+                    Electronic
                   </th>
                   <th scope="col" className="h-8 px-3 text-right font-semibold">
                     Mechanical
@@ -178,7 +264,7 @@ function DashboardContent({ stale }: { stale: boolean }) {
                         <span className="mpn text-[0.75rem] text-ink-subtle">{list.file}</span>
                       </span>
                     </th>
-                    <td className="px-3 text-right tabular-nums">{list.electrical}</td>
+                    <td className="px-3 text-right tabular-nums">{list.electronic}</td>
                     <td className="px-3 text-right tabular-nums">{list.mechanical}</td>
                     <td className="px-3 text-right tabular-nums">
                       {list.skipped ? list.skipped : <span className="text-ink-subtle">0</span>}
@@ -204,6 +290,18 @@ function DashboardContent({ stale }: { stale: boolean }) {
       </div>
 
       <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] content-start gap-6">
+        <section aria-labelledby="design-title" className={panel}>
+          <PanelHeader id="design-title" title="Design runs" meta="0 runs" />
+          <div className="grid justify-items-start gap-3 border-t border-hairline px-4 py-4">
+            <p className="text-ui text-ink-muted">
+              No design run yet. A run uses your own OpenAI or Astra key, once, on a complete brief.
+            </p>
+            <LinkButton href="/app/design/new" size="sm" icon="circuit-board">
+              Start a design
+            </LinkButton>
+          </div>
+        </section>
+
         <section aria-labelledby="alerts-title" className={panel}>
           <PanelHeader id="alerts-title" title="Lifecycle changes" meta="This week" />
           {stale ? (
@@ -301,11 +399,14 @@ function DashboardEmpty() {
       headingLevel="h2"
       className="py-16"
       illustration={<EmptyBoardIllustration className="h-24 w-auto" />}
-      title="Start with a parts list"
-      description="Import a CSV or Excel parts list. Revuu lines up each electrical and mechanical part with its alternates."
+      title="Start with the part you need to replace"
+      description="Enter the original and up to 4 candidates, or import a parts list and pick the original from it."
       action={
         <div className="grid justify-items-center gap-3">
-          <LinkButton href="/app/parts" variant="primary" icon="upload">
+          <LinkButton href="/app/parts/new" variant="primary" icon="replace">
+            Compare parts
+          </LinkButton>
+          <LinkButton href="/app/parts" icon="upload">
             Import parts list
           </LinkButton>
           <LinkButton href="/#how-it-works" variant="link" size="sm">

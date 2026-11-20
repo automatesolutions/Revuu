@@ -17,30 +17,30 @@ const tiers: Tier[] = [
     name: "Free",
     price: "$0",
     priceNote: "No card needed",
-    summary: "For a small team trying Revuu on a real parts list.",
+    summary: "For an engineer checking alternates on a real parts list.",
     cta: "Start free",
     includes: [
       "3 members",
-      "2 active projects",
+      "Part comparison on your Anthropic key",
+      "Electronic, mechanical and miscellaneous parts",
+      "Up to 4 candidates per comparison",
       "200 lines per parts list",
-      "Electrical and mechanical parts",
-      "Up to 3 alternates per part",
     ],
   },
   {
     name: "Team",
     price: "Per seat",
     priceNote: "Amount set before launch",
-    summary: "For teams that buy parts for new boards every month.",
+    summary: "For teams that replace parts in production boards every month.",
     cta: "Start free",
     featured: true,
     includes: [
-      "Unlimited projects",
+      "Unlimited members",
       "2,000 lines per parts list",
+      "Comparison sheet download (CSV)",
+      "Cost comparison for value engineering",
       "Shared vendor records",
-      "Approved Parts List (AVL)",
       "EOL and NRND alerts",
-      "Comparison export as CSV",
     ],
   },
   {
@@ -62,32 +62,44 @@ const tiers: Tier[] = [
 type Cell = boolean | string;
 const comparison: { group: string; rows: { label: string; values: [Cell, Cell, Cell] }[] }[] = [
   {
-    group: "Import",
+    group: "Part comparison",
+    rows: [
+      { label: "Electronic, mechanical and miscellaneous parts", values: [true, true, true] },
+      { label: "Candidates per comparison", values: ["4", "4", "4"] },
+      { label: "Replacement judgement with checks to run", values: [true, true, true] },
+      { label: "Unit-normalized spec differences", values: [true, true, true] },
+      { label: "Printable comparison report", values: [true, true, true] },
+      { label: "Comparison sheet download (CSV)", values: [false, true, true] },
+      { label: "Cost comparison", values: [false, true, true] },
+      { label: "EOL and NRND alerts", values: [false, true, true] },
+    ],
+  },
+  {
+    group: "Parts lists",
     rows: [
       { label: "CSV, XLSX and XLS parts lists", values: [true, true, true] },
       { label: "Column mapping you confirm", values: [true, true, true] },
       { label: "Lines per parts list", values: ["200", "2,000", "Custom"] },
       { label: "Saved column mappings", values: [false, false, true] },
-      { label: "Members", values: ["3", "Unlimited", "Unlimited"] },
-      { label: "Active projects", values: ["2", "Unlimited", "Unlimited"] },
-    ],
-  },
-  {
-    group: "Comparison",
-    rows: [
-      { label: "Electrical and mechanical alternates", values: [true, true, true] },
-      { label: "Alternates per part", values: ["3", "3", "3"] },
-      { label: "Unit-normalized spec differences", values: [true, true, true] },
-      { label: "Vendor contacts with source", values: [true, true, true] },
       { label: "Shared vendor records", values: [false, true, true] },
-      { label: "Approved Parts List (AVL)", values: [false, true, true] },
-      { label: "EOL and NRND alerts", values: [false, true, true] },
     ],
   },
   {
-    group: "Export and security",
+    group: "Hardware design",
     rows: [
-      { label: "Comparison export (CSV)", values: [false, true, true] },
+      { label: "Design brief with required-field checks", values: [true, true, true] },
+      { label: "Runs on your OpenAI or Astra key", values: [true, true, true] },
+      {
+        label: "Revuu fee per run",
+        values: ["Set before launch", "Set before launch", "Set before launch"],
+      },
+    ],
+  },
+  {
+    group: "Workspace and security",
+    rows: [
+      { label: "Members", values: ["3", "Unlimited", "Unlimited"] },
+      { label: "Model keys stored server-side", values: [true, true, true] },
       { label: "Audit log", values: [true, true, true] },
       { label: "Audit log export", values: [false, false, true] },
       { label: "SAML single sign-on", values: [false, false, true] },
@@ -101,16 +113,20 @@ const faqs = [
     a: "Before public launch. Until then, every workspace runs on the Free limits, and we will tell you the price before anything is charged.",
   },
   {
-    q: "Which files can we import?",
-    a: "CSV, XLSX and XLS parts lists, from Altium, KiCad, OrCAD or a mechanical spreadsheet. You confirm the columns before Revuu creates any part.",
+    q: "Who pays for the model?",
+    a: "You do, on your own key. Part comparison uses your Anthropic key. Hardware design uses your OpenAI or Astra key. Your provider bills you at its own rates; the plan price does not include model usage.",
   },
   {
-    q: "Where do vendor emails and phone numbers come from?",
-    a: "From your imported list first, then from the vendor record. Each one shows its source. Revuu never searches the web for contacts.",
+    q: "What does a hardware design run cost?",
+    a: "The model cost is on your OpenAI or Astra bill. Any Revuu fee per run is set before launch. Before you confirm a run, Revuu shows its prompt size and risks.",
   },
   {
-    q: "Can we export our data?",
-    a: "Yes. Parts lists export as CSV on every plan, and comparisons export as CSV on Team and Business.",
+    q: "Why does a design run only once?",
+    a: "Runs are expensive. Revuu collects the whole brief and refuses to run until the fields your outputs need are filled, so the first result can be used. To change the brief, start a new design.",
+  },
+  {
+    q: "Where do our keys go?",
+    a: "To Secret Manager on Revuu's server. They never reach the browser and are never logged. Key storage is not live yet in the demo workspace.",
   },
 ];
 
@@ -126,8 +142,8 @@ export function PricingPage() {
             Start free. Pay per seat when the team grows.
           </h1>
           <p className="text-body-lg text-ink-muted">
-            Free covers a real parts list. Team and Business prices are set before launch, and you
-            will see them before anything is charged.
+            Plans cover part comparison. Model usage is billed to your own keys. Team and Business
+            prices are set before launch, and you will see them before anything is charged.
           </p>
         </div>
       </section>

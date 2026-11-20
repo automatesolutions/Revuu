@@ -29,7 +29,7 @@ const statuses: Status[] = [
 ];
 
 const typeScale = [
-  { token: "display-lg", sample: "Compare every part" },
+  { token: "display-lg", sample: "Hardware design" },
   { token: "headline", sample: "3 alternates for Q3" },
   { token: "page-title", sample: "Power board, Rev C" },
   { token: "title", sample: "Alternates side by side" },
@@ -193,8 +193,8 @@ export default function DesignSystemPage() {
             </Field>
             <Field label="Category">
               {({ id }) => (
-                <Select id={id} defaultValue="electrical">
-                  <option value="electrical">Electrical</option>
+                <Select id={id} defaultValue="electronic">
+                  <option value="electronic">Electronic</option>
                   <option value="mechanical">Mechanical</option>
                 </Select>
               )}

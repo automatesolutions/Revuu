@@ -1,13 +1,15 @@
 ---
 name: revuu-tone
-description: Revuu's voice for every user-facing string, including marketing pages, app UI, buttons, empty states, errors, emails, release report text and docs. Use when the user runs /revuu-tone, when writing or reviewing any copy in the Revuu repo, or when the user corrects Revuu wording (record the correction here).
+description: Revuu's voice for every user-facing string, including marketing pages, app UI, buttons, empty states, errors, emails, comparison report text and docs. Use when the user runs /revuu-tone, when writing or reviewing any copy in the Revuu repo, or when the user corrects Revuu wording (record the correction here).
 user-invocable: true
 ---
 
 # /revuu-tone
 
-Revuu is a design review tool for electronics hardware teams. Readers are hardware, layout,
-component and compliance engineers. They read datasheets for a living and distrust marketing.
+Revuu compares an original part with its alternates from their datasheets (replacement is the
+default question), and, second, makes one hardware-design run on the engineer's own model keys.
+Readers are component, hardware, mechanical and QA engineers. They read datasheets for a living
+and distrust marketing.
 
 Apply the layers in order. When two layers disagree, the earlier one wins.
 
@@ -20,10 +22,10 @@ Apply the layers in order. When two layers disagree, the earlier one wins.
 ## Revuu rules
 
 - **One idea per screen.** Each screen, section and dialog has one job. The heading says that job.
-- **Plain engineering language.** Name the real object: "BOM line", "MPN", "revision", "sign-off".
+- **Plain engineering language.** Name the real object: "BOM line", "MPN", "original", "datasheet page".
   Engineers trust the noun they already use.
-- **Verb first on actions.** Buttons say what happens: "Import BOM", "Request review",
-  "Sign off revision B". Never "Submit", "OK", "Continue" when a specific verb fits.
+- **Verb first on actions.** Buttons say what happens: "Import parts list", "Compare parts",
+  "Run design". Never "Submit", "OK", "Continue" when a specific verb fits.
 - **Numbers are data.** Use numerals for quantities, prices, part counts and revisions.
   Keep units with values ("10 µF", "0.8 mm", "$0.042 @ 1k").
 - **No AI filler.** No "seamless", "powerful", "next-generation", "AI-powered" (unless a feature
@@ -34,6 +36,10 @@ Apply the layers in order. When two layers disagree, the earlier one wins.
 - **Errors name the cause and the fix.** "DigiKey did not respond. Revuu retries in 2 minutes.
   Prices shown are from 06:40." Never blame the user.
 - **Empty states teach the next step.** Say why it is empty, then give one action.
+- **Replacement is allowed on the judgement.** Lists say "alternate part"; the comparison
+  verdict may say "replacement" ("Replacement judgement: Rework").
+- **Never claim what is not built.** No live RAG, model runs or KiCad / Onshape files in copy
+  until the code exists. Label demo data and planned features.
 - **Status words are fixed.** Use exactly: Approved, Pending, Warning, NRND, EOL, Obsolete,
   Rejected, Restricted, Proposed. Never synonyms ("OK", "Bad", "Deprecated").
 - **Sentence case** everywhere in UI, including buttons and headings. Product and standard
@@ -44,16 +50,17 @@ Apply the layers in order. When two layers disagree, the earlier one wins.
 
 | Use                                    | Avoid                                                |
 | -------------------------------------- | ---------------------------------------------------- |
-| reviewer, designer, engineer, team     | user, stakeholder, resource                          |
+| engineer, team                         | user, stakeholder, resource                          |
 | BOM line                               | item, row (in copy)                                  |
 | MPN (manufacturer part number)         | part code, SKU (unless distributor SKU)              |
 | revision (Rev A, Rev B)                | version, iteration                                   |
-| sign-off, sign off (verb)              | approval flow, green-light                           |
 | lifecycle: Active, NRND, EOL, Obsolete | discontinued (unless quoting a source)               |
-| alternate part                         | replacement, substitute (except DigiKey's own label) |
+| alternate part (in lists and tables)   | replacement, substitute (except DigiKey's own label) |
+| original (the part in the design)      | baseline, reference part                             |
+| Drop-in, Rework, Not acceptable        | compatible, partial, fail (on a judgement)           |
 | Approved Parts List (AVL)              | whitelist, preferred list                            |
-| release report                         | export, summary doc                                  |
-| checklist item                         | task, todo                                           |
+| comparison report                      | export, summary doc                                  |
+| design run (function 2)                | generation, AI magic                                 |
 
 ## What the category does (researched Oct 2026)
 
@@ -68,10 +75,10 @@ product above the fold, offer a free start. Avoid vague futurism and enterprise 
 
 ## Patterns
 
-- Hero headline: task + object + outcome. "Review the board before it ships."
-- Subhead: one sentence, who and how. "Schematic, layout and parts reviews with sign-off,
-  for hardware teams that release on a schedule."
-- Primary CTA: "Start free". Secondary: "See a sample review".
+- Hero headline: name both jobs. "Hardware design and parts comparison."
+- Subhead: one sentence, who and how. "Original and candidates side by side from their
+  datasheets, with a Drop-in, Rework or Not acceptable judgement and the checks to run."
+- Primary CTA: "Start free". Secondary: "See a sample comparison".
 - Section headings: a statement an engineer would agree with, not a slogan.
   "Every EOL part, flagged before layout freezes."
 

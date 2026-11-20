@@ -1,12 +1,12 @@
 import { AppShell } from "@/screens/app/app-shell";
 import { Dashboard } from "@/screens/app/dashboard";
-import { PlaceholderPage } from "@/screens/app/placeholder-page";
+import { Settings } from "@/screens/app/settings";
 
 export function AppShellArtboard({ state }: { state: string }) {
-  if (state === "placeholder-page") {
+  if (state === "settings") {
     return (
-      <AppShell current="avl" title="Approved Parts List">
-        <PlaceholderPage section="avl" />
+      <AppShell current="settings" title="Settings">
+        <Settings />
       </AppShell>
     );
   }

@@ -37,7 +37,7 @@ export function OgMark({ size = 56 }: { size?: number }) {
 const chips = [
   { label: "IRLML6402TRPBF", status: "EOL", fg: "#6235C2", bg: "#ECE5FB" },
   { label: "DMP2035U-7", status: "Drop-in", fg: "#0F1115", bg: "#ECE9E2" },
-  { label: "HSO-M3X12-BR-NI", status: "Functional", fg: "#0F1115", bg: "#ECE9E2" },
+  { label: "HSO-M3X12-BR-NI", status: "Rework", fg: "#0F1115", bg: "#ECE9E2" },
 ];
 
 /** Shared Open Graph card. Title is the only per-route variable. */

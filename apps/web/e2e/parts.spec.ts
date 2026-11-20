@@ -4,7 +4,7 @@ import { expectNoAxeViolations, expectNoHorizontalScroll, setTheme } from "./hel
 
 const demoCsv = path.join(__dirname, "../src/fixtures/parts/power-board-rev-c-demo.csv");
 
-/** Confirms the guessed columns, sets D2 (no category word) to Electrical, and creates the parts. */
+/** Confirms the guessed columns, sets D2 (no category word) to Electronic, and creates the parts. */
 async function confirmColumns(page: Page) {
   await expect(page.getByRole("heading", { level: 1, name: "Confirm the columns" })).toBeVisible();
   await expect(page.getByLabel("Manufacturer Part Number")).toHaveValue("mpn");
@@ -14,7 +14,7 @@ async function confirmColumns(page: Page) {
   await expect(create).toBeDisabled();
   await page
     .getByRole("group", { name: /Category for D2/ })
-    .getByText("Electrical")
+    .getByText("Electronic")
     .click();
   await expect(create).toBeEnabled();
   await create.click();
@@ -52,15 +52,17 @@ for (const theme of ["light", "dark"] as const) {
     for (const mpn of ["DMP2035U-7", "SI2343CDS-T1-GE3", "AO3401A"]) {
       await expect(table.getByRole("columnheader", { name: new RegExp(mpn) })).toBeVisible();
     }
-    await expect(table.getByRole("img", { name: "Differs from baseline" }).first()).toBeVisible();
+    await expect(
+      table.getByRole("img", { name: "Differs from the original" }).first(),
+    ).toBeVisible();
     await expect(
       table.getByText(
-        "Vds is −30 V against a −20 V baseline. Confirm the gate threshold at your gate drive voltage.",
+        "Vds is −30 V against a −20 V original. Confirm the gate threshold at your gate drive voltage.",
       ),
     ).toHaveCount(2);
     await expect(
       table.getByText(
-        "Current (Id) is −3.6 A against a −3.7 A baseline. Confirm the peak load current.",
+        "Current (Id) is −3.6 A against a −3.7 A original. Confirm the peak load current.",
       ),
     ).toBeVisible();
 
@@ -68,6 +70,21 @@ for (const theme of ["light", "dark"] as const) {
     await expect(table.getByRole("rowheader", { name: "Lead pitch" })).toBeVisible();
     await expect(table.getByRole("rowheader", { name: "Vgs(th), max" })).toBeVisible();
     await expect(table.getByRole("img", { name: /^Top view outline of / })).toHaveCount(4);
+
+    // Each alternate has a judgement, checks to run and a cost difference.
+    // Once in the column header, once in the judgement row.
+    await expect(table.getByText("Drop-in", { exact: true })).toHaveCount(6);
+    await expect(table.getByRole("rowheader", { name: "Checks to run" })).toBeVisible();
+    await expect(
+      table.getByText("Overlay both land patterns from the datasheets before you change the BOM."),
+    ).toHaveCount(3);
+    await expect(table.getByText("−$0.31 per unit (−82 %)")).toBeVisible();
+    await expect(page.getByRole("button", { name: "Print report" })).toBeVisible();
+    const download = page.waitForEvent("download");
+    await page.getByRole("button", { name: "Download sheet" }).click();
+    expect((await download).suggestedFilename()).toBe(
+      "compare_IRLML6402TRPBF_vs_DMP2035U-7_vs_SI2343CDS-T1-GE3_vs_AO3401A.csv",
+    );
 
     // Diodes Inc. email comes from the imported list; Vishay's from the vendor record.
     const diodesEmail = table.getByRole("link", { name: "sales@diodes.example" });
@@ -135,7 +152,7 @@ test("an uploaded CSV line with no vendor email says so", async ({ page }) => {
   ).toBeVisible();
 });
 
-test("the mechanical standoff has two functional alternates", async ({ page }) => {
+test("the mechanical standoff has two Rework alternates", async ({ page }) => {
   await page.goto("/app/parts");
   await page.getByRole("button", { name: "Load Power board Rev C, demo" }).click();
   await confirmColumns(page);
@@ -145,10 +162,10 @@ test("the mechanical standoff has two functional alternates", async ({ page }) =
     page.getByRole("heading", { level: 1, name: "Alternates for HSO-M3X10-BR-NI" }),
   ).toBeVisible();
   const table = page.getByRole("table");
-  await expect(table.getByText("Functional", { exact: true })).toHaveCount(3);
+  await expect(table.getByText("Rework", { exact: true })).toHaveCount(4);
   await expect(table.getByRole("img", { name: /^Side view outline of HSO-M3X12/ })).toBeVisible();
   await expect(
-    table.getByText("Length is 12 mm against a 10 mm baseline. Confirm the stack height."),
+    table.getByText("Length is 12 mm against a 10 mm original. Confirm the stack height."),
   ).toBeVisible();
   // The standoff line has no email, but the vendor record for Calder Supply does.
   await expect(
@@ -156,4 +173,27 @@ test("the mechanical standoff has two functional alternates", async ({ page }) =
   ).toBeVisible();
   const calder = table.getByRole("link", { name: "quotes@calder.example" });
   await expect(calder.locator("xpath=..")).toContainText("Vendor record");
+});
+
+test("a new comparison checks every part before it can run", async ({ page }) => {
+  await page.goto("/app/parts/new");
+  await expect(page.getByRole("heading", { level: 1, name: "Compare parts" })).toBeVisible();
+  await page.getByRole("button", { name: "Check comparison" }).click();
+  await expect(page.getByText("Enter the MPN of the original.")).toBeVisible();
+  await expect(page.getByText("Enter the MPN of candidate 1.")).toBeVisible();
+
+  const original = page.getByRole("group", { name: "Original" });
+  await original.getByLabel("MPN").fill("IRLML6402TRPBF");
+  await original.getByLabel("Maker").fill("Infineon");
+  const candidate = page.getByRole("group", { name: "Candidate 1" });
+  await candidate.getByLabel("MPN").fill("DMP2035U-7");
+  await candidate.getByLabel("Maker").fill("Diodes Inc.");
+  await page.getByRole("button", { name: "Check comparison" }).click();
+
+  await expect(
+    page.getByRole("heading", { name: "The comparison is complete and ready to run" }),
+  ).toBeVisible();
+  await expect(page.getByRole("button", { name: "Run comparison" })).toBeDisabled();
+  await expect(page.getByText("Revuu called no model and read no datasheet.")).toBeVisible();
+  await expectNoAxeViolations(page);
 });

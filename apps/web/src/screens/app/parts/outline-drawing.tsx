@@ -15,7 +15,7 @@ function threadDiameter(thread: SpecValue | undefined) {
 
 /** The longest outline dimension in mm, so every drawing in a row can share one scale. */
 export function drawingExtent(record: PartRecord) {
-  if (record.category === "electrical") return mm(record.specs.bodyLength) ?? 0;
+  if (record.category === "electronic") return mm(record.specs.bodyLength) ?? 0;
   return mm(record.specs.length) ?? 0;
 }
 
@@ -26,12 +26,12 @@ const TEXT = 11;
 const GAP = 6;
 
 /**
- * An outline drawn from the record's dimensions at `pxPerMm`. Electrical parts get a top view
+ * An outline drawn from the record's dimensions at `pxPerMm`. Electronic parts get a top view
  * with body size and lead pitch; mechanical parts get a side view with length, hex across flats
  * and thread depth. It is not the manufacturer's drawing.
  */
 export function OutlineDrawing({ record, pxPerMm }: { record: PartRecord; pxPerMm: number }) {
-  return record.category === "electrical" ? (
+  return record.category === "electronic" ? (
     <PackageTopView record={record} k={pxPerMm} />
   ) : (
     <StandoffSideView record={record} k={pxPerMm} />

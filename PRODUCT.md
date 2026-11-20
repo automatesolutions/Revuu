@@ -16,49 +16,75 @@ pnpm workspace: `apps/web`, `packages/ui`, `packages/config` (later `packages/db
 
 ## Users
 
-Electronics hardware teams that release boards on a schedule:
+Engineers who keep hardware in production and must change parts in it:
 
-- **Designers** (schematic and PCB layout engineers) who prepare a revision and answer review comments.
-- **Reviewers** (senior hardware, component, mechanical and compliance engineers) who work through
-  checklists, raise issues and sign off.
-- **Admins** (engineering leads) who own the org, the Approved Parts List (AVL), checklist templates and
-  integrations.
-- **Viewers** (operations, purchasing, management) who read status and release reports.
+- **Component engineers** who find a second source or an alternate for an EOL, NRND or
+  short-supply part, and must say whether it fits the existing board.
+- **Hardware and mechanical engineers** who own the board or assembly the part sits on, and run
+  the checks before a change is accepted.
+- **QA and purchasing** who need written evidence and a cost difference before they accept an
+  alternate part.
+- **Hardware engineers starting a new board** who want one production-usable first design from a
+  complete brief (secondary).
 
-Their job: get a hardware revision reviewed and signed off before release, with a record of every decision.
+Their job, in order:
+
+1. Decide whether a candidate part can replace the original in an existing design, and what must be
+   checked or changed first.
+2. Less often: turn a full product brief into one schematic, PCB and enclosure deliverable.
 
 ## Product Purpose
 
-Revuu replaces spreadsheets, email threads and scattered PDFs with one place where a hardware
-design is reviewed and signed off before release. Success: every release has a complete,
-auditable review (schematic, PCB layout, parts, later mechanical and safety/compliance), no EOL or
-unapproved part reaches production unnoticed, and the release report is generated, not assembled.
+Revuu has two functions. The first is the product.
+
+1. **Part comparison.** The engineer gives an original part and 1 to 4 candidates (MPN, maker,
+   datasheet PDF). Revuu reads the datasheets with retrieval over the extracted pages, on the
+   engineer's own Anthropic key, and returns a side-by-side comparison with a judgement for each
+   candidate: Drop-in, Rework or Not acceptable. Every number cites a datasheet page. Each
+   judgement lists concrete checks to run. A cost comparison appears when prices exist. The report
+   prints to PDF, and the sheet and source documents download.
+2. **Hardware design.** The engineer fills in a complete brief once: project, specification,
+   reference designs, PCB size, stack-up, the constraints that matter, part size limits, enclosure
+   size, standards and the outputs they need. Revuu checks the brief is complete, shows the size and
+   risk of the run, then makes one run on the engineer's own OpenAI or Astra key. The result is only
+   what they asked for: KiCad schematic, KiCad PCB (BOM, POS, Gerber), Onshape enclosure and a
+   design document with decisions and remaining risks. There is no iteration inside the product.
+
+Success: an engineer can answer "can this part replace that one, and what do I check?" from
+cited datasheet evidence in one sitting, and a design run is never wasted on an incomplete brief.
 
 ## Positioning
 
-A review and sign-off layer that sits beside any ECAD tool, rather than another ECAD suite or a
-heavyweight PLM. It joins checklist-driven reviews with live parts intelligence from distributor
-data (price, stock, lifecycle, specs, alternates) in the same revision, so a parts risk is raised
-inside the review where the decision is made.
+A datasheet-first replacement check that sits beside any ECAD tool, not another ECAD suite or a
+PLM. Replacement is the default question, the original is always pinned, and no number appears
+without its page. Hardware design is a secondary, gated feature that runs on the engineer's own
+model keys; Revuu does not resell model usage under its own key for design.
 
 ## Operating Context
 
-- Flow: Project > Revision > upload BOM (CSV/XLSX) and files (schematic PDF, Gerbers, STEP) >
-  assign reviewers > run reviews > sign-off gate > release report (PDF).
-- Engineers live in dense data: BOM tables of hundreds to thousands of lines, MPNs, designators,
-  datasheets, parametric specs. Keyboard use is common.
-- Review work is collaborative and asynchronous: threaded comments, mentions, multiple reviewers.
-- Parts data comes from Mouser (API key) and DigiKey (OAuth2) first; LCSC via CSV import until
-  official partner API access is approved. Distributor daily quotas are a hard constraint.
+- Function 1 flow: Parts > import a parts list or start a comparison > pick the original >
+  add 1 to 4 candidates with datasheets > comparison with judgement, checks and cost > print or
+  download.
+- Function 2 flow: Design > wizard (project, board and enclosure, outputs and standards) >
+  confirm one run with its size and risk > results with downloads per output.
+- Categories: electronic, mechanical, miscellaneous. Electronic follows the `/compare-parts`
+  method; mechanical and miscellaneous follow `/compare-mech-parts`.
+- Engineers live in dense data: BOM tables, MPNs, designators, datasheets, parametric specs.
+  Keyboard use is common.
+- Model keys belong to the engineer and stay server-side (Secret Manager). They are never sent to
+  the client and never logged.
+- Parts data from Mouser and DigiKey is planned; distributor daily quotas are a hard constraint.
 
 ## Capabilities and Constraints
 
-- Review modules: Schematic, PCB layout and Parts first. Mechanical and Safety/Compliance after launch.
-- Parts: BOM import, approval workflow, EOL/NRND alerts, alternates, side-by-side spec comparison.
-- AVL statuses: Proposed, Approved, Restricted, Rejected.
-- Roles: Admin, Reviewer, Designer, Viewer. Audit trail on every decision.
-- All distributor API keys stay server-side.
-- Undecided: pricing amounts, data residency region, Gerber/STEP inline viewers before launch.
+- Today (M0): marketing, design system, app shell, BOM import and demo comparisons on sample part
+  records, and a design wizard that validates inputs and builds the prompt without calling a model.
+- Later: datasheet extraction and RAG, key storage, live comparison runs, printable reports from
+  real datasheets, and design runs that return real KiCad and Onshape files.
+- Replacement judgement words: Drop-in, Rework, Not acceptable.
+- Status words: Approved, Pending, Warning, NRND, EOL, Obsolete, Rejected, Restricted, Proposed.
+- Never invent prices, stock or datasheet numbers. Missing values are shown as missing.
+- Undecided: pricing amounts, any Revuu fee on design runs, data residency region.
 
 ## Brand Commitments
 
@@ -74,10 +100,12 @@ them; use clearly marked placeholders.
 
 ## Product Principles
 
-1. The decision lives where the evidence is: comments, part data and sign-off sit on the same revision.
-2. Dense, not cluttered: engineers prefer more data per screen when it is aligned and scannable.
-3. Every decision is attributable and reversible only through a new recorded decision.
-4. Data shows its source and age; never present stale distributor data as live.
+1. The original is the reference. Every candidate is judged against the design it must fit.
+2. Every number has a source page. Missing is shown as missing, never estimated.
+3. A judgement comes with the checks that prove it, written as tests an engineer can run.
+4. Dense, not cluttered: engineers prefer more data per screen when it is aligned and scannable.
+5. Expensive runs happen once, and only on a complete brief.
+6. Data shows its source and age; never present stale distributor data as live.
 
 ## Accessibility & Inclusion
 

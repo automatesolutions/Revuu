@@ -1,5 +1,13 @@
 import { AppShellArtboard } from "./screens/app-shell";
 import { DashboardArtboard } from "./screens/dashboard";
+import {
+  DesignArtboard,
+  DesignWizardArtboard,
+  designStates,
+  NewComparisonArtboard,
+  newComparisonStates,
+  wizardStates,
+} from "./screens/design";
 import { MarketingHomeArtboard } from "./screens/marketing-home";
 import {
   PartsCompareArtboard,
@@ -27,7 +35,7 @@ export const artboards: Artboard[] = [
     title: "Marketing home",
     mode: "persuade",
     brief:
-      "Show an engineer a parts list compared with its alternates, then get them to start free.",
+      "Show an engineer an alternate judged against the original, then hardware design as the second job.",
     states: ["default"],
     render: () => <MarketingHomeArtboard />,
   },
@@ -35,7 +43,8 @@ export const artboards: Artboard[] = [
     id: "pricing",
     title: "Pricing",
     mode: "persuade",
-    brief: "Say what each plan includes, and be honest that paid prices are not set yet.",
+    brief:
+      "Say what each plan includes, that model usage is on the engineer's keys, and that paid prices are not set yet.",
     states: ["default"],
     render: () => <PricingArtboard />,
   },
@@ -44,7 +53,7 @@ export const artboards: Artboard[] = [
     title: "App shell",
     mode: "operate",
     brief: "Get anywhere in the workspace in one click or one Ctrl+K.",
-    states: ["default", "command-palette", "placeholder-page"],
+    states: ["default", "command-palette", "settings"],
     render: (state) => <AppShellArtboard state={state} />,
   },
   {
@@ -52,7 +61,7 @@ export const artboards: Artboard[] = [
     title: "Dashboard",
     mode: "operate",
     brief:
-      "Show which parts need an alternate and which parts lists changed, before anything else.",
+      "Show open comparisons and the parts that still need an alternate, before anything else.",
     states: dashboardStates,
     render: (state) => <DashboardArtboard state={state} />,
   },
@@ -68,7 +77,7 @@ export const artboards: Artboard[] = [
     id: "parts-table",
     title: "Parts table",
     mode: "operate",
-    brief: "Show every imported electrical and mechanical part, and open one to compare.",
+    brief: "Show every imported part, and open one to make it the original.",
     states: ["default"],
     render: () => <PartsTableArtboard />,
   },
@@ -76,9 +85,34 @@ export const artboards: Artboard[] = [
     id: "parts-compare",
     title: "Alternate comparison",
     mode: "operate",
-    brief: "Show a part beside up to three alternates, with every spec difference marked.",
+    brief:
+      "Show the original beside up to 4 alternates, each with a judgement, checks to run and cost.",
     states: partsCompareStates,
     render: (state) => <PartsCompareArtboard state={state} />,
+  },
+  {
+    id: "parts-new",
+    title: "New comparison",
+    mode: "operate",
+    brief: "Collect the original and 1 to 4 candidates with maker and datasheet, then check them.",
+    states: newComparisonStates,
+    render: (state) => <NewComparisonArtboard state={state} />,
+  },
+  {
+    id: "design",
+    title: "Design overview",
+    mode: "operate",
+    brief: "Say what one design run makes, and start one.",
+    states: designStates,
+    render: (state) => <DesignArtboard state={state} />,
+  },
+  {
+    id: "design-wizard",
+    title: "Design wizard",
+    mode: "operate",
+    brief: "Collect the whole brief, refuse to run until it is complete, then run once.",
+    states: wizardStates,
+    render: (state) => <DesignWizardArtboard state={state} />,
   },
 ];
 

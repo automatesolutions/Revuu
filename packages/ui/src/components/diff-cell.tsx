@@ -3,7 +3,7 @@ import { Icon } from "./icon";
 
 export interface DiffCellProps {
   children: React.ReactNode;
-  /** True when the value differs from the baseline part. */
+  /** True when the value differs from the original part. */
   differs: boolean;
   align?: "start" | "end";
   className?: string;
@@ -29,7 +29,7 @@ export function DiffCell({ children, differs, align = "start", className }: Diff
         {differs ? (
           <Icon
             name="differs"
-            label="Differs from baseline"
+            label="Differs from the original"
             className="mt-0.5 size-3.5 text-status-warning"
           />
         ) : null}

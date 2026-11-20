@@ -3,6 +3,7 @@ import { LifecycleBadge } from "@revuu/ui/components/status-chip";
 import { cn } from "@revuu/ui/lib/cn";
 import type { PartRecord } from "@/lib/parts/compare";
 import { OutlineDrawing } from "@/screens/app/parts/outline-drawing";
+import { FitTag } from "@/screens/app/parts/parts-ui";
 
 const panel =
   "rounded-lg bg-raised text-ink shadow-[0_0_0_1px_var(--color-hairline),0_16px_40px_-24px_rgb(15_17_21/0.3)]";
@@ -15,20 +16,11 @@ function DemoNote({ children }: { children: React.ReactNode }) {
   );
 }
 
-function FitTag({ fit }: { fit: "Drop-in" | "Functional" }) {
-  return (
-    <span className="inline-flex h-5 items-center gap-1 rounded-xs bg-raised px-1.5 text-[0.75rem] font-semibold whitespace-nowrap text-ink shadow-[inset_0_0_0_1px_var(--color-hairline-strong)]">
-      <Icon name={fit === "Drop-in" ? "check" : "git-compare"} className="size-3" />
-      {fit}
-    </span>
-  );
-}
-
 const mapping: { header: string; sample: string; field: string | null }[] = [
   { header: "Designator", sample: "Q3", field: "Designator" },
   { header: "Manufacturer Part Number", sample: "IRLML6402TRPBF", field: "MPN" },
   { header: "Description", sample: "MOSFET P-ch 20 V 3.7 A SOT-23", field: "Description" },
-  { header: "Category", sample: "Electrical", field: "Category" },
+  { header: "Category", sample: "Electronic", field: "Category" },
   { header: "Supplier Email", sample: "sales@diodes.example", field: "Vendor email" },
   { header: "Footprint", sample: "SOT-23", field: null },
 ];
@@ -85,7 +77,7 @@ const same = (value: string, count: number): Cell[] =>
 const mosfet = (mpn: string, manufacturer: string): PartRecord => ({
   mpn,
   manufacturer,
-  category: "electrical",
+  category: "electronic",
   specs: {
     package: "SOT-23",
     pins: 3,
@@ -258,8 +250,8 @@ export function AlternatesMock() {
               <td className="border-b border-hairline" />
               <th scope="col" className="border-b border-hairline px-2 py-2 font-normal">
                 <span className="grid gap-1">
-                  <span className="w-fit rounded-xs bg-sunken px-1.5 text-[0.6875rem] font-semibold text-ink-muted">
-                    Baseline
+                  <span className="w-fit rounded-xs bg-primary px-1.5 text-[0.6875rem] font-semibold text-on-primary">
+                    Original
                   </span>
                   <span className="mpn text-[0.6875rem] break-all">IRLML6402TRPBF</span>
                 </span>
@@ -351,7 +343,7 @@ export function MechanicalMock() {
     <div className={panel}>
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-hairline px-4 py-3.5">
         <span className="mpn">SO1–SO4 · HSO-M3X10-BR-NI</span>
-        <FitTag fit="Functional" />
+        <FitTag fit="Rework" />
       </div>
       <div
         role="region"
@@ -368,7 +360,7 @@ export function MechanicalMock() {
             <tr className="bg-surface text-left text-caption text-ink-muted">
               <td className="border-b border-hairline" />
               <th scope="col" className="h-8 border-b border-hairline px-2 font-semibold">
-                Baseline
+                Original
               </th>
               <th scope="col" className="h-8 border-b border-hairline px-2 font-semibold">
                 <span className="mpn">HSO-M3X12-BR-NI</span>
@@ -395,7 +387,7 @@ export function MechanicalMock() {
         </table>
       </div>
       <p className="px-4 py-3.5 text-body-sm">
-        Length is 12 mm against a 10 mm baseline. Confirm the stack height.
+        Rework: length is 12 mm against a 10 mm original. Confirm the stack height.
       </p>
     </div>
   );
@@ -436,6 +428,55 @@ export function VendorMock() {
           </span>
         </span>
       </div>
+    </div>
+  );
+}
+
+const briefRows: { label: string; value: string | null }[] = [
+  { label: "Project title", value: "Sensor hub Rev B" },
+  { label: "Product specification", value: "24 V in, 4 sensor ports, RS-485" },
+  { label: "PCB size", value: "80 × 50 mm" },
+  { label: "Layer count", value: "4" },
+  { label: "Stack-up notes", value: null },
+  { label: "Enclosure size", value: "100 × 70 × 30 mm" },
+];
+
+export function DesignMock() {
+  return (
+    <div className={panel}>
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-hairline px-4 py-3.5">
+        <span className="text-[0.9375rem] font-bold">Confirm run</span>
+        <span className="text-caption font-medium text-ink-subtle">
+          KiCad schematic, KiCad PCB, Onshape enclosure
+        </span>
+      </div>
+      <ul className="divide-y divide-hairline">
+        {briefRows.map((row) => (
+          <li key={row.label} className="flex items-center gap-3 px-4 py-2.5 text-ui">
+            <Icon
+              name={row.value ? "check-circle" : "triangle-alert"}
+              className={cn("size-4", row.value ? "text-status-approved" : "text-status-warning")}
+            />
+            <span className="w-40 shrink-0 text-ink-muted">{row.label}</span>
+            <span className={cn("min-w-0 truncate", !row.value && "text-status-warning")}>
+              {row.value ?? "Required: controlled impedance is a focus area"}
+            </span>
+          </li>
+        ))}
+      </ul>
+      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-hairline px-4 py-3.5">
+        <span className="text-caption font-medium text-ink-muted">
+          Fill 1 required field to run.
+        </span>
+        <span className="inline-flex h-9 items-center gap-2 rounded-md bg-sunken px-3.5 text-[0.875rem] font-semibold text-ink-muted">
+          <Icon name="circuit-board" />
+          Run design once
+        </span>
+      </div>
+      <DemoNote>
+        <Icon name="info" className="size-3.5" />
+        Example brief. Design runs are not live yet: no model is called and no file is made.
+      </DemoNote>
     </div>
   );
 }

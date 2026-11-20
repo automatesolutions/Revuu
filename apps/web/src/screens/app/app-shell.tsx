@@ -12,17 +12,15 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { currentUser, workspace } from "@/fixtures/dashboard";
 import { CommandPalette } from "./command-palette";
 
-export type AppSection = "dashboard" | "projects" | "parts" | "avl" | "integrations" | "settings";
+export type AppSection = "dashboard" | "parts" | "design" | "settings";
 
 const primaryNav: { id: AppSection; label: string; icon: IconName; href: string }[] = [
   { id: "dashboard", label: "Dashboard", icon: "layout-dashboard", href: "/app" },
-  { id: "projects", label: "Projects", icon: "folder-kanban", href: "/app/projects" },
-  { id: "parts", label: "Parts", icon: "package", href: "/app/parts" },
-  { id: "avl", label: "Approved Parts List", icon: "shield-check", href: "/app/avl" },
+  { id: "parts", label: "Parts", icon: "git-compare", href: "/app/parts" },
+  { id: "design", label: "Design", icon: "circuit-board", href: "/app/design" },
 ];
 
 const secondaryNav: { id: AppSection; label: string; icon: IconName; href: string }[] = [
-  { id: "integrations", label: "Integrations", icon: "plug", href: "/app/integrations" },
   { id: "settings", label: "Settings", icon: "settings", href: "/app/settings" },
 ];
 
@@ -74,7 +72,7 @@ export function AppShell({
   }, [drawerOpen]);
 
   return (
-    <div className="min-h-dvh bg-canvas text-ink lg:grid lg:grid-cols-[248px_minmax(0,1fr)]">
+    <div className="min-h-dvh bg-canvas text-ink lg:grid lg:grid-cols-[248px_minmax(0,1fr)] print:block">
       <a
         href="#main"
         className="sr-only z-50 rounded-md bg-primary px-3 py-2 text-label text-on-primary focus:not-sr-only focus:fixed focus:top-3 focus:left-3"
@@ -82,7 +80,7 @@ export function AppShell({
         Skip to content
       </a>
 
-      <aside className="sticky top-0 hidden h-dvh border-r border-hairline bg-surface lg:block">
+      <aside className="sticky top-0 hidden h-dvh border-r border-hairline bg-surface lg:block print:hidden">
         <Sidebar current={current} />
       </aside>
 
@@ -107,7 +105,7 @@ export function AppShell({
       </dialog>
 
       <div className="flex min-w-0 flex-col">
-        <header className="sticky top-0 z-20 flex h-14 items-center gap-3 border-b border-hairline bg-canvas px-4 lg:px-6">
+        <header className="sticky top-0 z-20 flex h-14 items-center gap-3 border-b border-hairline bg-canvas px-4 lg:px-6 print:hidden">
           <IconButton
             icon="panel-left"
             label="Open navigation"
@@ -141,7 +139,7 @@ export function AppShell({
         </header>
 
         {notice ? (
-          <p className="flex items-center gap-2 border-b border-hairline bg-surface px-4 py-2 text-caption font-medium text-ink-muted lg:px-6">
+          <p className="flex items-center gap-2 border-b border-hairline bg-surface px-4 py-2 text-caption font-medium text-ink-muted lg:px-6 print:hidden">
             <Icon name="help-circle" className="size-3.5" />
             {notice}
           </p>
@@ -179,7 +177,7 @@ function Sidebar({ current, onNavigate }: { current: AppSection; onNavigate?: ()
         ))}
       </nav>
 
-      <nav aria-label="Admin" className="mt-auto grid gap-0.5">
+      <nav aria-label="Account" className="mt-auto grid gap-0.5">
         {secondaryNav.map((item) => (
           <NavLink key={item.id} {...item} active={current === item.id} onNavigate={onNavigate} />
         ))}

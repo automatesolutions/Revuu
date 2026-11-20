@@ -7,9 +7,16 @@ import { Icon } from "@revuu/ui/components/icon";
 import { cn } from "@revuu/ui/lib/cn";
 import { assignColumn, fieldLabel, partFields } from "@/lib/parts/fields";
 import { draftLines, unresolvedLines, type DraftLine } from "@/lib/parts/lines";
-import type { Category, ColumnMapping, ParsedSheet, PartField } from "@/lib/parts/types";
+import {
+  categories,
+  categoryLabel,
+  type Category,
+  type ColumnMapping,
+  type ParsedSheet,
+  type PartField,
+} from "@/lib/parts/types";
 import { ImportError } from "./import-start";
-import { DemoTag, panel } from "./parts-ui";
+import { categoryIcon, DemoTag, panel } from "./parts-ui";
 
 function plural(n: number, one: string, many = `${one}s`) {
   return `${n} ${n === 1 ? one : many}`;
@@ -42,8 +49,9 @@ export function ColumnMapping({
   );
   const unresolved = unresolvedLines(drafts, chosen);
   const categoryOf = (d: DraftLine) => d.category ?? chosen[d.id] ?? null;
-  const electrical = drafts.filter((d) => categoryOf(d) === "electrical").length;
+  const electronic = drafts.filter((d) => categoryOf(d) === "electronic").length;
   const mechanical = drafts.filter((d) => categoryOf(d) === "mechanical").length;
+  const miscellaneous = drafts.filter((d) => categoryOf(d) === "miscellaneous").length;
   const fieldFor = (column: number) => partFields.find((f) => mapping[f.id] === column)?.id ?? null;
 
   const blocker =
@@ -124,7 +132,7 @@ export function ColumnMapping({
                 <span className="font-semibold">
                   {plural(drafts.length, "part")} will be created
                 </span>
-                : {electrical} electrical, {mechanical} mechanical
+                : {electronic} electronic, {mechanical} mechanical, {miscellaneous} miscellaneous
                 {unresolved.length ? `, ${unresolved.length} not set` : ""}.
               </>
             )}
@@ -266,7 +274,7 @@ function CategoryPicker({
         </h2>
         <p className="text-caption font-medium text-ink-subtle">
           {categoryMapped ? "The category cell is blank" : "There is no category column"}, and the
-          description has no category word. Choose Electrical or Mechanical.
+          description has no category word. Choose Electronic, Mechanical or Miscellaneous.
         </p>
       </div>
       <ul className="divide-y divide-hairline">
@@ -288,7 +296,7 @@ function CategoryPicker({
               <legend className="sr-only">
                 Category for {line.designator ?? `row ${line.row}`}, {line.mpn}
               </legend>
-              {(["electrical", "mechanical"] as const).map((category) => {
+              {categories.map((category) => {
                 const checked = chosen[line.id] === category;
                 return (
                   <label
@@ -306,8 +314,8 @@ function CategoryPicker({
                       onChange={() => onChoose(line.id, category)}
                       className="sr-only"
                     />
-                    <Icon name={category === "electrical" ? "zap" : "nut"} className="size-3.5" />
-                    {category === "electrical" ? "Electrical" : "Mechanical"}
+                    <Icon name={categoryIcon[category]} className="size-3.5" />
+                    {categoryLabel[category]}
                   </label>
                 );
               })}

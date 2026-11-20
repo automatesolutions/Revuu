@@ -10,9 +10,8 @@ import { LinkButton } from "@/components/link-button";
 
 const links = [
   { href: "/#why", label: "Why Revuu" },
-  { href: "/#import", label: "Import" },
-  { href: "/#compare", label: "Comparison" },
-  { href: "/#vendors", label: "Vendor contacts" },
+  { href: "/#compare", label: "Part comparison" },
+  { href: "/#design", label: "Hardware design" },
   { href: "/pricing", label: "Pricing" },
 ];
 

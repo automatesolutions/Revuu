@@ -17,7 +17,7 @@ export function PartsImportBoard({ state, sheet }: { state: string; sheet: Parse
   const [mapping, setMapping] = useState(() => guessMapping(sheet.headers));
   const [chosen, setChosen] = useState<Record<string, Category>>(() =>
     state === "mapping-ready"
-      ? { "row-9": "electrical" as const }
+      ? { "row-9": "electronic" as const }
       : ({} as Record<string, Category>),
   );
   const body = state.startsWith("mapping") ? (

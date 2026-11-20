@@ -28,7 +28,11 @@ export function DemoTag({ className }: { className?: string }) {
   );
 }
 
-const categoryIcon: Record<Category, IconName> = { electrical: "zap", mechanical: "nut" };
+export const categoryIcon: Record<Category, IconName> = {
+  electronic: "zap",
+  mechanical: "nut",
+  miscellaneous: "package",
+};
 
 export function CategoryTag({ category }: { category: Category }) {
   return (
@@ -39,15 +43,24 @@ export function CategoryTag({ category }: { category: Category }) {
   );
 }
 
-export function FitTag({ fit }: { fit: Fit }) {
+const fitStyle: Record<Fit, { icon: IconName; className: string }> = {
+  "Drop-in": { icon: "check-circle", className: "bg-status-approved-bg text-status-approved" },
+  Rework: { icon: "wrench", className: "bg-status-warning-bg text-status-warning" },
+  "Not acceptable": { icon: "x-circle", className: "bg-status-rejected-bg text-status-rejected" },
+};
+
+/** Replacement judgement: always icon plus word, never color alone. */
+export function FitTag({ fit, className }: { fit: Fit; className?: string }) {
+  const style = fitStyle[fit];
   return (
     <span
       className={cn(
         "inline-flex h-5 shrink-0 items-center gap-1 rounded-xs px-1.5 text-[0.75rem] font-semibold whitespace-nowrap",
-        "bg-raised text-ink shadow-[inset_0_0_0_1px_var(--color-hairline-strong)]",
+        style.className,
+        className,
       )}
     >
-      <Icon name={fit === "Drop-in" ? "check" : "git-compare"} className="size-3" />
+      <Icon name={style.icon} className="size-3" />
       {fit}
     </span>
   );

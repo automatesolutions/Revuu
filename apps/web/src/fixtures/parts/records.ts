@@ -7,12 +7,12 @@
 import { bomLines } from "@/fixtures/bom";
 import type { PartRecord, VendorRecord } from "@/lib/parts/compare";
 
-const electricalRecords: PartRecord[] = bomLines
+const electronicRecords: PartRecord[] = bomLines
   .filter((line) => line.refs !== "Q3")
   .map((line) => ({
     mpn: line.mpn,
     manufacturer: line.manufacturer,
-    category: "electrical",
+    category: "electronic",
     specs: {},
     lifecycle: line.lifecycle,
     stock: line.stock,
@@ -26,7 +26,7 @@ const electricalRecords: PartRecord[] = bomLines
 const q3: PartRecord = {
   mpn: "IRLML6402TRPBF",
   manufacturer: "Infineon",
-  category: "electrical",
+  category: "electronic",
   specs: {
     voltage: "−20 V",
     current: "−3.7 A",
@@ -108,14 +108,14 @@ const screw: PartRecord = {
   age: "3 d ago",
 };
 
-export const partRecords: PartRecord[] = [...electricalRecords, q3, standoff, screw];
+export const partRecords: PartRecord[] = [...electronicRecords, q3, standoff, screw];
 
 export const alternateRecords: Record<string, PartRecord[]> = {
   IRLML6402TRPBF: [
     {
       mpn: "DMP2035U-7",
       manufacturer: "Diodes Inc.",
-      category: "electrical",
+      category: "electronic",
       specs: {
         voltage: "−20 V",
         current: "−3.6 A",
@@ -144,7 +144,7 @@ export const alternateRecords: Record<string, PartRecord[]> = {
     {
       mpn: "SI2343CDS-T1-GE3",
       manufacturer: "Vishay",
-      category: "electrical",
+      category: "electronic",
       specs: {
         voltage: "−30 V",
         current: "−4.0 A",
@@ -173,7 +173,7 @@ export const alternateRecords: Record<string, PartRecord[]> = {
     {
       mpn: "AO3401A",
       manufacturer: "Alpha & Omega",
-      category: "electrical",
+      category: "electronic",
       specs: {
         voltage: "−30 V",
         current: "−4.0 A",

@@ -2,8 +2,8 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { findAlternates, findRecord, vendorRecords } from "@/fixtures/parts/records";
-import { categoryFromDescription } from "./category";
-import { compareAlternates } from "./compare";
+import { categoryFromCell, categoryFromDescription } from "./category";
+import { compareAlternates, costDelta } from "./compare";
 import { assignColumn, guessMapping } from "./fields";
 import { createParts, draftLines, unresolvedLines, vendorsFromParts } from "./lines";
 import { parseCsv, parsePartsFile } from "./parse-file";
@@ -17,7 +17,7 @@ function demoParts() {
   const parsed = parsePartsFile("demo.xlsx", demo("xlsx"), true);
   if (!parsed.ok) throw new Error("demo did not parse");
   const { drafts, skipped } = draftLines(parsed.sheet.rows, guessMapping(parsed.sheet.headers));
-  const { parts } = createParts(drafts, { "row-9": "electrical" });
+  const { parts } = createParts(drafts, { "row-9": "electronic" });
   return { parts: parts!, skipped, drafts };
 }
 
@@ -81,9 +81,16 @@ describe("column mapping", () => {
 describe("categories", () => {
   it("reads only the listed description words", () => {
     expect(categoryFromDescription("Washer, flat, M3, nylon 6/6")).toBe("mechanical");
-    expect(categoryFromDescription("MOSFET P-ch 20 V")).toBe("electrical");
+    expect(categoryFromDescription("MOSFET P-ch 20 V")).toBe("electronic");
     expect(categoryFromDescription("TVS 15 V 600 W SMB")).toBeNull();
     expect(categoryFromDescription("Connector screw kit")).toBeNull();
+    expect(categoryFromDescription("Battery, CR2032 holder")).toBe("miscellaneous");
+  });
+
+  it("reads Electrical from ECAD exports as Electronic", () => {
+    expect(categoryFromCell("Electrical")).toBe("electronic");
+    expect(categoryFromCell("Misc")).toBe("miscellaneous");
+    expect(categoryFromCell("Other")).toBeNull();
   });
 
   it("creates demo parts and skips the line with no MPN", () => {
@@ -134,7 +141,7 @@ describe("comparison", () => {
     const vds = c.rows.find((r) => r.key === "voltage")!;
     expect(vds.alternates.map((a) => a.differs)).toEqual([false, true, true]);
     expect(c.alternates[1]!.remark).toBe(
-      "Vds is −30 V against a −20 V baseline. Confirm the gate threshold at your gate drive voltage.",
+      "Vds is −30 V against a −20 V original. Confirm the gate threshold at your gate drive voltage.",
     );
     // The imported list wins over the vendor record, and says so.
     expect(c.alternates[0]!.vendorBlock.email).toEqual({
@@ -156,18 +163,18 @@ describe("comparison", () => {
     ]);
   });
 
-  it("calls a mechanical part functional when length or material differs", () => {
+  it("calls a mechanical part Rework when length or material differs", () => {
     const c = compareAlternates(
       findRecord("HSO-M3X10-BR-NI")!,
       findAlternates("HSO-M3X10-BR-NI"),
       imported,
       vendorRecords,
     );
-    expect(c.alternates.map((a) => a.fit)).toEqual(["Functional", "Functional"]);
+    expect(c.alternates.map((a) => a.fit)).toEqual(["Rework", "Rework"]);
     expect(c.alternates[0]!.remark).toBe(
-      "Length is 12 mm against a 10 mm baseline. Confirm the stack height.",
+      "Length is 12 mm against a 10 mm original. Confirm the stack height.",
     );
-    expect(c.alternates[1]!.remark).toMatch(/^Material is aluminum against a brass baseline\./);
+    expect(c.alternates[1]!.remark).toMatch(/^Material is aluminum against a brass original\./);
     // "10.0 mm" and "M3 x 0.5" match the baseline once normalized.
     expect(c.alternates.map((a) => a.dimensionsDiffer)).toEqual([true, false]);
     expect(c.rows.find((r) => r.key === "torque")!.alternates.map((a) => a.differs)).toEqual([
@@ -176,5 +183,43 @@ describe("comparison", () => {
     ]);
     const length = c.rows.find((r) => r.key === "length")!;
     expect(length.alternates.map((a) => a.differs)).toEqual([true, false]);
+  });
+
+  it("calls a candidate Not acceptable when the polarity differs", () => {
+    const original = findRecord("IRLML6402TRPBF")!;
+    const nChannel = {
+      ...findAlternates("IRLML6402TRPBF")[0]!,
+      mpn: "TEST-N-CH",
+      specs: { ...findAlternates("IRLML6402TRPBF")[0]!.specs, polarity: "N-channel" },
+    };
+    const c = compareAlternates(original, [nChannel], imported, vendorRecords);
+    expect(c.alternates[0]!.fit).toBe("Not acceptable");
+    expect(c.alternates[0]!.remark).toMatch(
+      /^Polarity is N-channel against a P-channel original\./,
+    );
+  });
+
+  it("lists concrete checks and the cost difference for each candidate", () => {
+    const c = compareAlternates(
+      findRecord("IRLML6402TRPBF")!,
+      findAlternates("IRLML6402TRPBF"),
+      imported,
+      vendorRecords,
+    );
+    for (const alt of c.alternates) {
+      expect(alt.checksToRun.at(-1)).toBe(
+        "Overlay both land patterns from the datasheets before you change the BOM.",
+      );
+      expect(new Set(alt.checksToRun).size).toBe(alt.checksToRun.length);
+    }
+    expect(c.alternates[1]!.checksToRun[0]).toBe(
+      "Confirm the gate threshold at your gate drive voltage.",
+    );
+    expect(costDelta(0.38, 0.07)).toEqual({
+      delta: 0.07 - 0.38,
+      percent: ((0.07 - 0.38) / 0.38) * 100,
+    });
+    expect(costDelta(null, 0.07)).toBeNull();
+    expect(costDelta(0, 0.07)).toBeNull();
   });
 });

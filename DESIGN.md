@@ -1,7 +1,7 @@
 ---
 version: alpha
 name: Revuu
-description: "Lab bench, not boardroom. A warm-white, graphite-ink editorial frame for hardware design review: confident Cabinet Grotesk display type, calm Satoshi UI text, and large color-block panels drawn from PCB materials (solder mask, FR4, silkscreen, copper, board navy). Marketing pages tell the story in blocks; the app is dense, aligned and quiet, with status carried by icon + label chips."
+description: "Lab bench, not boardroom. A warm-white, graphite-ink editorial frame for datasheet part comparison and hardware design: confident Cabinet Grotesk display type, calm Satoshi UI text, and large color-block panels drawn from PCB materials (solder mask, FR4, silkscreen, copper, board navy). Marketing pages tell the story in blocks; the app is dense, aligned and quiet, with status carried by icon + label chips."
 
 colors:
   canvas: "#FBFAF7"
@@ -398,10 +398,10 @@ Color strategy: **Restrained** in the app (warm neutrals + copper + status color
 
 | Token          | Light     | Dark      | Story it carries                |
 | -------------- | --------- | --------- | ------------------------------- |
-| `block-solder` | `#CFE6D2` | `#18291D` | Reviews and checklists          |
+| `block-solder` | `#CFE6D2` | `#18291D` | Judgements and checks to run    |
 | `block-fr4`    | `#EFE6CC` | `#2A2518` | Parts and BOM intelligence      |
-| `block-silk`   | `#E6E3F5` | `#211F38` | Collaboration and comments      |
-| `block-copper` | `#F4D9C6` | `#2F1E14` | Sign-off and release            |
+| `block-silk`   | `#E6E3F5` | `#211F38` | Mechanical and misc parts       |
+| `block-copper` | `#F4D9C6` | `#2F1E14` | Hardware design runs            |
 | `block-board`  | `#14213D` | `#1A2B4F` | Security, closing CTA (inverse) |
 
 ### Status colors

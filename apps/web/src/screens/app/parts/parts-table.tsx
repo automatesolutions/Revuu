@@ -6,6 +6,7 @@ import { DataTable, type Column } from "@revuu/ui/components/data-table";
 import { Icon } from "@revuu/ui/components/icon";
 import { cn } from "@revuu/ui/lib/cn";
 import { categoryLabel, type Category, type ImportResult, type Part } from "@/lib/parts/types";
+import { LinkButton } from "@/components/link-button";
 import { ImportError, useFilePicker, type ImportBusy } from "./import-start";
 import { CategoryTag, DemoTag, number } from "./parts-ui";
 
@@ -99,8 +100,9 @@ export function PartsTable({
   );
   const counts = {
     all: result.parts.length,
-    electrical: result.parts.filter((p) => p.category === "electrical").length,
+    electronic: result.parts.filter((p) => p.category === "electronic").length,
     mechanical: result.parts.filter((p) => p.category === "mechanical").length,
+    miscellaneous: result.parts.filter((p) => p.category === "miscellaneous").length,
   };
   const selectedParts = result.parts.filter((p) => selected.has(p.id));
   const lines = result.parts.length + result.skipped.length;
@@ -114,14 +116,19 @@ export function PartsTable({
             {result.demo ? <DemoTag /> : null}
           </div>
           <p className="text-body-sm text-ink-muted">
-            From <span className="mpn text-ink">{result.fileName}</span>. Open a line to compare it
-            with its alternates.
+            From <span className="mpn text-ink">{result.fileName}</span>. Open a line to make it the
+            original and compare it with its alternates.
           </p>
         </div>
         {picker.input}
-        <Button icon="upload" loading={busy === "file"} onClick={picker.open}>
-          Import another list
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button icon="upload" loading={busy === "file"} onClick={picker.open}>
+            Import another list
+          </Button>
+          <LinkButton href="/app/parts/new" icon="replace">
+            Compare parts by MPN
+          </LinkButton>
+        </div>
       </div>
 
       {error ? <ImportError message={error} onDismiss={onDismissError} /> : null}
@@ -136,8 +143,9 @@ export function PartsTable({
             <span className="font-semibold">
               {result.parts.length} {result.parts.length === 1 ? "part" : "parts"} created
             </span>{" "}
-            from {lines} {lines === 1 ? "line" : "lines"}: {counts.electrical} electrical,{" "}
-            {counts.mechanical} mechanical. {result.skipped.length} skipped.
+            from {lines} {lines === 1 ? "line" : "lines"}: {counts.electronic} electronic,{" "}
+            {counts.mechanical} mechanical, {counts.miscellaneous} miscellaneous.{" "}
+            {result.skipped.length} skipped.
           </span>
         </p>
         {result.skipped.length ? (
@@ -204,8 +212,9 @@ function CategoryFilter({
 }) {
   const options: { id: Filter; label: string }[] = [
     { id: "all", label: "All" },
-    { id: "electrical", label: "Electrical" },
+    { id: "electronic", label: "Electronic" },
     { id: "mechanical", label: "Mechanical" },
+    { id: "miscellaneous", label: "Miscellaneous" },
   ];
   return (
     <div

@@ -11,7 +11,7 @@ export const metadata: Metadata = {
     template: "%s · Revuu",
   },
   description:
-    "Import a CSV or Excel parts list and compare every electrical and mechanical part with its alternates, spec by spec.",
+    "Compare an original part with its alternates from their datasheets. Replacement judgement, checks to run and cost. Hardware design in one run on your own keys.",
   applicationName: "Revuu",
 };
 

@@ -15,7 +15,7 @@ export const partsImportStates = [
   "mapping-ready",
 ] as const;
 export const partsCompareStates = [
-  "electrical",
+  "electronic",
   "mechanical",
   "no-alternates",
   "loading",
@@ -32,7 +32,7 @@ async function demoSheet() {
 async function demoResult(): Promise<ImportResult> {
   const sheet = await demoSheet();
   const { drafts, skipped } = draftLines(sheet.rows, guessMapping(sheet.headers));
-  const { parts } = createParts(drafts, { "row-9": "electrical" });
+  const { parts } = createParts(drafts, { "row-9": "electronic" });
   return { fileName: sheet.fileName, demo: true, importedAt: "", parts: parts!, skipped };
 }
 
@@ -45,7 +45,7 @@ export async function PartsTableArtboard() {
 }
 
 const comparePart: Record<string, string> = {
-  electrical: "IRLML6402TRPBF",
+  electronic: "IRLML6402TRPBF",
   mechanical: "HSO-M3X10-BR-NI",
   "no-alternates": "TPS62133RGTR",
   loading: "IRLML6402TRPBF",

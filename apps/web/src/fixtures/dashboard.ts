@@ -9,7 +9,7 @@ export interface PartsListRow {
   name: string;
   file: string;
   lines: number;
-  electrical: number;
+  electronic: number;
   mechanical: number;
   skipped: number;
   needAlternate: number;
@@ -22,7 +22,7 @@ export const partsLists: PartsListRow[] = [
     name: "Power board Rev C",
     file: "power-board-rev-c-demo.xlsx",
     lines: 12,
-    electrical: 8,
+    electronic: 8,
     mechanical: 3,
     skipped: 1,
     needAlternate: 3,
@@ -33,7 +33,7 @@ export const partsLists: PartsListRow[] = [
     name: "Motor driver Rev A",
     file: "motor-driver-rev-a.xlsx",
     lines: 64,
-    electrical: 51,
+    electronic: 51,
     mechanical: 13,
     skipped: 0,
     needAlternate: 2,
@@ -44,7 +44,7 @@ export const partsLists: PartsListRow[] = [
     name: "Sensor hub Rev B",
     file: "sensor-hub-rev-b.csv",
     lines: 40,
-    electrical: 30,
+    electronic: 30,
     mechanical: 8,
     skipped: 2,
     needAlternate: 1,
@@ -55,7 +55,7 @@ export const partsLists: PartsListRow[] = [
     name: "Enclosure Rev A",
     file: "enclosure-rev-a.csv",
     lines: 22,
-    electrical: 0,
+    electronic: 0,
     mechanical: 22,
     skipped: 0,
     needAlternate: 0,
@@ -170,7 +170,7 @@ export const activity: ActivityItem[] = [
   {
     id: "e2",
     who: "Ana Reyes",
-    action: "set D2 to Electrical on",
+    action: "set D2 to Electronic on",
     target: "Power board Rev C",
     when: "12 min ago",
   },
@@ -184,8 +184,8 @@ export const activity: ActivityItem[] = [
   {
     id: "e4",
     who: "Ana Reyes",
-    action: "rejected AO3401A for",
-    target: "the Approved Parts List",
+    action: "compared HSO-M3X10-BR-NI with",
+    target: "2 alternates",
     when: "Yesterday",
   },
   {

@@ -3,7 +3,7 @@ import { vendorKey } from "./lines";
 import type { Category, VendorContact } from "./types";
 import { sameSpec, type SpecValue } from "./units";
 
-export type ElectricalSpec =
+export type ElectronicSpec =
   | "voltage"
   | "current"
   | "resistance"
@@ -21,7 +21,8 @@ export type ElectricalSpec =
   | "temperature";
 export type MechanicalSpec =
   "thread" | "length" | "material" | "acrossFlats" | "threadDepth" | "finish" | "drive" | "torque";
-export type SpecKey = ElectricalSpec | MechanicalSpec;
+export type MiscellaneousSpec = "size" | "rating" | "life";
+export type SpecKey = ElectronicSpec | MechanicalSpec | MiscellaneousSpec;
 
 export type SpecGroup = "Ratings" | "Package and dimensions" | "Functional" | "Fit" | "Dimensions";
 
@@ -46,10 +47,11 @@ export const dimensionKeys: SpecKey[] = [
   "length",
   "acrossFlats",
   "threadDepth",
+  "size",
 ];
 
 export const specRows: Record<Category, SpecDef[]> = {
-  electrical: [
+  electronic: [
     {
       key: "voltage",
       group: "Ratings",
@@ -173,12 +175,60 @@ export const specRows: Record<Category, SpecDef[]> = {
       check: "Confirm the assembly torque setting.",
     },
   ],
+  miscellaneous: [
+    {
+      key: "size",
+      group: "Fit",
+      label: "Size or envelope",
+      check: "Confirm it fits the space the original uses.",
+    },
+    {
+      key: "material",
+      group: "Fit",
+      label: "Material",
+      check: "Confirm compatibility with every surface it touches.",
+      lowercaseInProse: true,
+    },
+    {
+      key: "rating",
+      group: "Ratings",
+      label: "Rated value",
+      check: "Confirm the rating covers your worst case.",
+    },
+    {
+      key: "temperature",
+      group: "Functional",
+      label: "Operating temperature",
+      check: "Confirm the product's temperature range.",
+    },
+    {
+      key: "life",
+      group: "Functional",
+      label: "Rated or shelf life",
+      check: "Confirm the service and storage interval.",
+    },
+  ],
 };
 
-/** Drop-in needs these to match exactly. Anything else is Functional. */
+/** Drop-in needs these to match exactly. A difference in one of them means Rework. */
 export const fitKeys: Record<Category, SpecKey[]> = {
-  electrical: ["package", "pins", "polarity"],
+  electronic: ["package", "pins", "polarity"],
   mechanical: ["thread", "length", "material"],
+  miscellaneous: ["size", "material"],
+};
+
+/** A difference here cannot be fixed on the existing design: the candidate is Not acceptable. */
+export const blockingKeys: Record<Category, SpecKey[]> = {
+  electronic: ["polarity"],
+  mechanical: [],
+  miscellaneous: [],
+};
+
+/** The last check on every candidate, whatever the specs say. */
+export const finalCheck: Record<Category, string> = {
+  electronic: "Overlay both land patterns from the datasheets before you change the BOM.",
+  mechanical: "Fit one sample in the assembly before you change the BOM.",
+  miscellaneous: "Fit one sample in the product before you change the BOM.",
 };
 
 export interface PartRecord {
@@ -218,11 +268,23 @@ export interface VendorBlock {
   url: ContactField;
 }
 
-export type Fit = "Drop-in" | "Functional";
+/** Replacement judgement against the original, as in the compare skills. */
+export type Fit = "Drop-in" | "Rework" | "Not acceptable";
+export const fits: Fit[] = ["Drop-in", "Rework", "Not acceptable"];
+
+/** Unit price difference against the original. Only when both prices are on record. */
+export interface CostDelta {
+  delta: number;
+  /** Percent of the original's unit price. */
+  percent: number;
+}
 
 export interface ComparedAlternate extends PartRecord {
   fit: Fit;
   remark: string;
+  /** Concrete checks to run before the candidate replaces the original, most important first. */
+  checksToRun: string[];
+  cost: CostDelta | null;
   vendorBlock: VendorBlock;
   /** True when any dimension row differs, so the outline drawing differs too. */
   dimensionsDiffer: boolean;
@@ -287,9 +349,15 @@ function differenceRemark(
   alt: SpecValue,
   check: string,
 ) {
-  if (alt === null) return `${label} is not in the vendor record. ${check}`;
-  if (base === null) return `${label} is not in the baseline record. ${check}`;
-  return `${label} is ${prose(alt, def)} against a ${prose(base, def)} baseline. ${check}`;
+  if (alt === null) return `${label} is not in the candidate's record. ${check}`;
+  if (base === null) return `${label} is not in the original's record. ${check}`;
+  return `${label} is ${prose(alt, def)} against a ${prose(base, def)} original. ${check}`;
+}
+
+export function costDelta(original: number | null, candidate: number | null): CostDelta | null {
+  if (original === null || candidate === null || original <= 0) return null;
+  const delta = candidate - original;
+  return { delta, percent: (delta / original) * 100 };
 }
 
 export function compareAlternates(
@@ -303,7 +371,8 @@ export function compareAlternates(
     label: baseline.labels?.[def.key] ?? def.label,
     check: baseline.checks?.[def.key] ?? def.check,
   }));
-  const shown = alternates.slice(0, 3);
+  // 2 to 5 parts in one comparison: the original and up to 4 candidates.
+  const shown = alternates.slice(0, 4);
 
   const rows: ComparisonRow[] = defs.map((def) => {
     const base = baseline.specs[def.key] ?? null;
@@ -322,13 +391,19 @@ export function compareAlternates(
   const compared = shown.map((alt, i): ComparedAlternate => {
     const block = vendorBlock(alt.vendor, imported, vendors);
     const differing = defs.filter((_, r) => rows[r]!.alternates[i]!.differs);
-    const fitMiss = differing.find((def) => fitKeys[baseline.category].includes(def.key));
-    // A fit field missing on both sides cannot prove a drop-in either.
-    const fitUnknown = fitKeys[baseline.category].find(
-      (key) => (baseline.specs[key] ?? null) === null,
+    const category = baseline.category;
+    // A blocking field only blocks when both records give it; a gap is Rework, not a verdict.
+    const blockMiss = differing.find(
+      (def) =>
+        blockingKeys[category].includes(def.key) &&
+        (baseline.specs[def.key] ?? null) !== null &&
+        (alt.specs[def.key] ?? null) !== null,
     );
-    const fit: Fit = fitMiss || fitUnknown ? "Functional" : "Drop-in";
-    const first = fitMiss ?? differing[0];
+    const fitMiss = differing.find((def) => fitKeys[category].includes(def.key));
+    // A fit field missing on both sides cannot prove a drop-in either.
+    const fitUnknown = fitKeys[category].find((key) => (baseline.specs[key] ?? null) === null);
+    const fit: Fit = blockMiss ? "Not acceptable" : fitMiss || fitUnknown ? "Rework" : "Drop-in";
+    const first = blockMiss ?? fitMiss ?? differing[0];
     let remark: string;
     if (first) {
       remark = differenceRemark(
@@ -346,12 +421,33 @@ export function compareAlternates(
         block.email.source === "Imported list" ? "the imported list" : "the vendor record";
       remark = `Vendor email is ${block.email.value}, from ${from}.`;
     } else {
-      remark = "Specs match the baseline. Ask the vendor for an email contact before you order.";
+      remark = "Specs match the original. Ask the vendor for an email contact before you order.";
     }
+    // Fit differences first, then everything else, each check once.
+    const ordered = [
+      ...differing.filter((def) => fitKeys[category].includes(def.key)),
+      ...differing.filter((def) => !fitKeys[category].includes(def.key)),
+    ];
+    const unknownCheck = fitUnknown ? defs.find((d) => d.key === fitUnknown)?.check : undefined;
+    const checksToRun = [
+      ...new Set([
+        ...ordered.map((def) => def.check),
+        ...(unknownCheck ? [unknownCheck] : []),
+        finalCheck[category],
+      ]),
+    ];
     const dimensionsDiffer = rows.some(
       (row) => dimensionKeys.includes(row.key) && row.alternates[i]!.differs,
     );
-    return { ...alt, fit, remark, vendorBlock: block, dimensionsDiffer };
+    return {
+      ...alt,
+      fit,
+      remark,
+      checksToRun,
+      cost: costDelta(baseline.unitPrice, alt.unitPrice),
+      vendorBlock: block,
+      dimensionsDiffer,
+    };
   });
 
   return { baseline, rows, alternates: compared };

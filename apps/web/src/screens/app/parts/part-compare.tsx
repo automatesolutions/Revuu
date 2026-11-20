@@ -16,6 +16,7 @@ import {
   type PartRecord,
   type VendorBlock,
 } from "@/lib/parts/compare";
+import { comparisonCsv, formatCost, sheetName } from "@/lib/parts/sheet";
 import { categoryLabel, type Part } from "@/lib/parts/types";
 import type { SpecValue } from "@/lib/parts/units";
 import { drawingExtent, OutlineDrawing } from "./outline-drawing";
@@ -44,7 +45,7 @@ export function PartCompare({
           variant="ghost"
           size="sm"
           icon="arrow-left"
-          className="-ml-2.5 w-fit max-lg:h-11"
+          className="-ml-2.5 w-fit max-lg:h-11 print:hidden"
         >
           Parts
         </LinkButton>
@@ -132,7 +133,7 @@ function PartHeader({ part, record }: { part: Part; record: PartRecord | null | 
     },
   ];
   return (
-    <section aria-label="Baseline part" className={cn(panel, "px-4 py-4 sm:px-5")}>
+    <section aria-label="Original part" className={cn(panel, "px-4 py-4 sm:px-5")}>
       <dl className="grid grid-cols-2 gap-x-6 gap-y-3 sm:grid-cols-[repeat(auto-fill,minmax(11rem,1fr))]">
         {items.map((item) => (
           <div key={item.term} className="grid min-w-0 content-start gap-1">
@@ -176,29 +177,52 @@ function ComparisonTable({ comparison }: { comparison: Comparison }) {
   const widest = Math.max(...[baseline, ...alternates].map(drawingExtent), 1);
   const pxPerMm = Math.min(32, 90 / widest);
   const head =
-    "sticky left-0 z-10 border-b border-r border-hairline bg-surface px-3 py-2 text-left align-top text-caption text-ink-muted";
+    "sticky left-0 z-10 border-b border-r border-hairline bg-surface px-3 py-2 text-left align-top text-caption text-ink-muted print:static";
+
+  function downloadSheet() {
+    const url = URL.createObjectURL(
+      new Blob([comparisonCsv(comparison)], { type: "text/csv;charset=utf-8" }),
+    );
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = sheetName(comparison);
+    link.click();
+    URL.revokeObjectURL(url);
+  }
 
   return (
     <section aria-labelledby="compare-title" className="grid grid-cols-[minmax(0,1fr)] gap-3">
-      <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <h2 id="compare-title" className="text-title">
-          {alternates.length} {alternates.length === 1 ? "alternate" : "alternates"} side by side
-        </h2>
-        <p className="text-caption font-medium text-ink-subtle">
-          {categoryLabel[category]} · Drop-in means the same {fitWords}.
-        </p>
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div className="grid gap-1">
+          <h2 id="compare-title" className="text-title">
+            {alternates.length} {alternates.length === 1 ? "alternate" : "alternates"} against the
+            original
+          </h2>
+          <p className="max-w-[72ch] text-caption font-medium text-ink-subtle">
+            {categoryLabel[category]}. Drop-in: same {fitWords}. Rework: the design must change
+            first. Not acceptable: cannot replace the original in this design.
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-2 print:hidden">
+          <Button size="sm" icon="download" onClick={downloadSheet} className="max-lg:h-11">
+            Download sheet
+          </Button>
+          <Button size="sm" icon="printer" onClick={() => window.print()} className="max-lg:h-11">
+            Print report
+          </Button>
+        </div>
       </div>
 
       <div
         role="region"
         aria-labelledby="compare-title"
         tabIndex={0}
-        className={cn(panel, "relative overflow-x-auto")}
+        className={cn(panel, "relative overflow-x-auto print:overflow-visible")}
       >
         <table className="w-full min-w-[46rem] table-fixed border-separate border-spacing-0 text-ui break-words">
           <caption className="sr-only">
-            {baseline.mpn} compared with {alternates.map((a) => a.mpn).join(", ")}. Cells marked
-            differs from baseline do not match the baseline after unit normalization.
+            {baseline.mpn}, the original, compared with {alternates.map((a) => a.mpn).join(", ")}.
+            Cells marked differs do not match the original after unit normalization.
           </caption>
           <colgroup>
             <col className="w-36" />
@@ -213,8 +237,9 @@ function ComparisonTable({ comparison }: { comparison: Comparison }) {
               <PartHead
                 record={baseline}
                 badge={
-                  <span className="inline-flex h-5 items-center rounded-xs bg-sunken px-1.5 text-[0.75rem] font-semibold text-ink-muted">
-                    Baseline
+                  <span className="inline-flex h-5 items-center gap-1 rounded-xs bg-primary px-1.5 text-[0.75rem] font-semibold text-on-primary">
+                    <Icon name="pin" className="size-3" />
+                    Original
                   </span>
                 }
               />
@@ -256,7 +281,7 @@ function ComparisonTable({ comparison }: { comparison: Comparison }) {
           <tbody>
             <tr>
               <th scope="row" className={head}>
-                {category === "electrical" ? "Outline, top view" : "Outline, side view"}
+                {category === "electronic" ? "Outline, top view" : "Outline, side view"}
               </th>
               <td className="border-r border-b border-hairline px-3 py-3 align-top">
                 <OutlineDrawing record={baseline} pxPerMm={pxPerMm} />
@@ -309,12 +334,30 @@ function ComparisonTable({ comparison }: { comparison: Comparison }) {
             </tr>
             <tr>
               <th scope="row" className={head}>
-                Datasheet
+                Cost vs original
+              </th>
+              <Plain>
+                <span className="text-ink-muted">Original</span>
+              </Plain>
+              {alternates.map((alt) => (
+                <Plain key={alt.mpn}>
+                  <span className={cn(!alt.cost && "text-ink-subtle")}>{formatCost(alt.cost)}</span>
+                </Plain>
+              ))}
+            </tr>
+            <tr>
+              <th scope="row" className={head}>
+                Source documents
               </th>
               {[baseline, ...alternates].map((r) => (
                 <Plain key={r.mpn}>
                   {r.datasheet ? (
-                    <span className="mpn break-all">{r.datasheet}</span>
+                    <span className="grid gap-0.5">
+                      <span className="mpn break-all">{r.datasheet}</span>
+                      <span className="text-[0.75rem] text-ink-subtle">
+                        File not stored in the demo
+                      </span>
+                    </span>
                   ) : (
                     <span className="text-ink-subtle">No datasheet on record</span>
                   )}
@@ -323,16 +366,36 @@ function ComparisonTable({ comparison }: { comparison: Comparison }) {
             </tr>
             <tr>
               <th scope="row" className={head}>
-                Remark
+                Replacement judgement
               </th>
               <Plain>
-                <span className="text-ink-muted">Baseline from the imported list.</span>
+                <span className="text-ink-muted">The part in the design today.</span>
               </Plain>
               {alternates.map((alt) => (
                 <Plain key={alt.mpn}>
-                  <p data-remark className="max-w-[30ch] text-body-sm text-pretty">
-                    {alt.remark}
-                  </p>
+                  <span className="grid justify-items-start gap-1.5">
+                    <FitTag fit={alt.fit} />
+                    <p data-remark className="max-w-[30ch] text-body-sm text-pretty">
+                      {alt.remark}
+                    </p>
+                  </span>
+                </Plain>
+              ))}
+            </tr>
+            <tr>
+              <th scope="row" className={head}>
+                Checks to run
+              </th>
+              <Plain>
+                <span className="text-ink-muted">None. This is the reference.</span>
+              </Plain>
+              {alternates.map((alt) => (
+                <Plain key={alt.mpn}>
+                  <ol className="grid max-w-[34ch] list-decimal gap-1 pl-4 text-body-sm text-pretty marker:text-ink-subtle">
+                    {alt.checksToRun.map((check) => (
+                      <li key={check}>{check}</li>
+                    ))}
+                  </ol>
                 </Plain>
               ))}
             </tr>
@@ -358,9 +421,10 @@ function ComparisonTable({ comparison }: { comparison: Comparison }) {
           <Icon name="differs" className="size-3" />
           Differs
         </span>
-        Value does not match the baseline after unit normalization. Outlines are drawn to one scale
-        from the record&rsquo;s dimensions, not from the manufacturer&rsquo;s drawing. Check the
-        datasheet before layout. Lifecycle, stock, and price are shown, not compared.
+        Value does not match the original after unit normalization. Values are demo records, not
+        read from a datasheet: live comparisons cite a datasheet page for every number. Outlines are
+        drawn to one scale from the record&rsquo;s dimensions, not from the manufacturer&rsquo;s
+        drawing. Lifecycle and stock are shown, not compared.
       </p>
     </section>
   );

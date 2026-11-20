@@ -1,8 +1,11 @@
-export type Category = "electrical" | "mechanical";
+export type Category = "electronic" | "mechanical" | "miscellaneous";
+
+export const categories: Category[] = ["electronic", "mechanical", "miscellaneous"];
 
 export const categoryLabel: Record<Category, string> = {
-  electrical: "Electrical",
+  electronic: "Electronic",
   mechanical: "Mechanical",
+  miscellaneous: "Miscellaneous",
 };
 
 export type PartField =

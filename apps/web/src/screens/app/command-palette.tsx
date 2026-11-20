@@ -16,20 +16,15 @@ type Command = {
 
 const commands: Command[] = [
   { id: "dashboard", label: "Dashboard", group: "Go to", icon: "layout-dashboard", href: "/app" },
+  { id: "parts", label: "Parts", group: "Go to", icon: "git-compare", href: "/app/parts" },
+  { id: "design", label: "Design", group: "Go to", icon: "circuit-board", href: "/app/design" },
   {
-    id: "projects",
-    label: "Projects",
-    group: "Go to",
-    icon: "folder-kanban",
-    href: "/app/projects",
-  },
-  { id: "parts", label: "Parts", group: "Go to", icon: "package", href: "/app/parts" },
-  {
-    id: "avl",
-    label: "Approved Parts List",
-    group: "Go to",
-    icon: "shield-check",
-    href: "/app/avl",
+    id: "compare-parts",
+    label: "Compare parts",
+    group: "Actions",
+    icon: "replace",
+    href: "/app/parts/new",
+    hint: "Original and 1 to 4 candidates",
   },
   {
     id: "import-parts",
@@ -38,6 +33,14 @@ const commands: Command[] = [
     icon: "upload",
     href: "/app/parts",
     hint: "CSV, XLSX or XLS",
+  },
+  {
+    id: "start-design",
+    label: "Start a design",
+    group: "Actions",
+    icon: "circuit-board",
+    href: "/app/design/new",
+    hint: "One run on your own key",
   },
   { id: "settings", label: "Settings", group: "Actions", icon: "settings", href: "/app/settings" },
 ];
@@ -169,7 +172,8 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose: () =
       </div>
 
       <p className="border-t border-hairline px-4 py-2.5 text-caption font-medium text-ink-subtle">
-        MPN search arrives in a later release. Open Parts to compare a line with its alternates.
+        MPN search arrives in a later release. Open Parts to compare an original with its
+        alternates.
       </p>
     </dialog>
   );

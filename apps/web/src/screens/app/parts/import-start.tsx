@@ -5,6 +5,7 @@ import { Button } from "@revuu/ui/components/button";
 import { Icon } from "@revuu/ui/components/icon";
 import { EmptyState, ErrorState } from "@revuu/ui/components/states";
 import { EmptyBoardIllustration } from "@/components/illustrations";
+import { LinkButton } from "@/components/link-button";
 import { acceptedExtensions } from "@/lib/parts/messages";
 import { splitMessage } from "./parts-ui";
 
@@ -69,7 +70,8 @@ export function ImportStart({
       <div className="grid gap-1">
         <h1 className="text-page-title">Parts</h1>
         <p className="text-body-sm text-ink-muted">
-          Import a parts list to compare each part with its alternates.
+          Pick the original part, then compare it with up to 4 alternates. Replacement is the
+          default question: can the alternate take its place on the existing design?
         </p>
       </div>
 
@@ -87,15 +89,20 @@ export function ImportStart({
         action={
           <div className="grid justify-items-center gap-4">
             {picker.input}
-            <Button
-              variant="primary"
-              icon="upload"
-              loading={busy === "file"}
-              disabled={busy !== null}
-              onClick={picker.open}
-            >
-              Import parts list
-            </Button>
+            <div className="flex flex-wrap justify-center gap-2">
+              <Button
+                variant="primary"
+                icon="upload"
+                loading={busy === "file"}
+                disabled={busy !== null}
+                onClick={picker.open}
+              >
+                Import parts list
+              </Button>
+              <LinkButton href="/app/parts/new" icon="replace">
+                Compare parts by MPN
+              </LinkButton>
+            </div>
             <p className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-caption font-medium text-ink-subtle">
               <span>No file at hand?</span>
               <button

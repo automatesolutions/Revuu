@@ -1,6 +1,12 @@
 import { emptyMapping, partFields } from "@/lib/parts/fields";
 import { createParts, draftLines } from "@/lib/parts/lines";
-import type { Category, ColumnMapping, ImportResult, ParsedSheet } from "@/lib/parts/types";
+import {
+  categories,
+  type Category,
+  type ColumnMapping,
+  type ImportResult,
+  type ParsedSheet,
+} from "@/lib/parts/types";
 
 const maxRows = 10_000;
 
@@ -48,7 +54,7 @@ export async function POST(request: Request) {
 
   const chosen: Record<string, Category> = {};
   for (const [id, value] of Object.entries(body.chosen ?? {})) {
-    if (value === "electrical" || value === "mechanical") chosen[id] = value;
+    if (categories.includes(value as Category)) chosen[id] = value as Category;
   }
 
   const { drafts, skipped } = draftLines(rows, mapping);
@@ -56,7 +62,7 @@ export async function POST(request: Request) {
   if (!parts) {
     return Response.json(
       {
-        error: `Set Electrical or Mechanical for row ${missingCategory.row}, then create the parts.`,
+        error: `Set Electronic, Mechanical or Miscellaneous for row ${missingCategory.row}, then create the parts.`,
       },
       { status: 422 },
     );

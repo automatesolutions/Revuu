@@ -3,48 +3,41 @@
 import { useEffect, useRef } from "react";
 import { loadGsap } from "@/lib/gsap";
 import { Icon } from "@revuu/ui/components/icon";
-import { LifecycleBadge, StatusChip } from "@revuu/ui/components/status-chip";
+import { LifecycleBadge } from "@revuu/ui/components/status-chip";
 import { cn } from "@revuu/ui/lib/cn";
+import { FitTag } from "@/screens/app/parts/parts-ui";
 
 const steps = [
   {
-    title: "Import the parts list",
-    body: "Drop in a CSV or Excel export from Altium, KiCad, OrCAD or your mechanical spreadsheet.",
+    title: "Pick the original part",
+    body: "Open a line from your parts list, or enter the MPN and maker of the part in your design.",
   },
   {
-    title: "Confirm the columns",
-    body: "Revuu guesses each column from its header. No part exists until you confirm.",
+    title: "Add up to 4 candidates",
+    body: "Electronic, mechanical or miscellaneous parts that could replace it.",
   },
   {
-    title: "Compare alternates",
-    body: "Up to three alternates per part, spec by spec. Every difference is marked, and each alternate is Drop-in or Functional.",
+    title: "Get a judgement for each",
+    body: "Drop-in, Rework or Not acceptable, with every spec difference marked and the checks to run.",
   },
   {
-    title: "Contact the vendor",
-    body: "Email, phone and URL with their source, only where your list or the vendor record has them.",
+    title: "Brief a new design",
+    body: "Fill one brief, and Revuu checks it is complete before a single schematic, PCB and enclosure run.",
   },
 ];
 
-const lines = [
-  { refs: "C1, C4, C7–C12", mpn: "GRM155R71C104KA88D", lifecycle: "active", avl: "approved" },
-  { refs: "U2", mpn: "TPS62133RGTR", lifecycle: "active", avl: "approved" },
-  { refs: "L1", mpn: "XAL4020-222MEB", lifecycle: "active", avl: "approved" },
-  { refs: "U5", mpn: "LM1117IMPX-3.3/NOPB", lifecycle: "nrnd", avl: "restricted" },
-  { refs: "R4, R9", mpn: "RC0402FR-0710KL", lifecycle: "active", avl: "approved" },
-] as const;
-
-const alternates = [
-  { mpn: "DMP2035U-7", maker: "Diodes Inc.", detail: "2 specs differ" },
-  { mpn: "SI2343CDS-T1-GE3", maker: "Vishay", detail: "3 specs differ" },
-  { mpn: "AO3401A", maker: "Alpha & Omega", detail: "3 specs differ" },
+const candidates = [
+  { mpn: "DMP2035U-7", maker: "Diodes Inc.", detail: "Rds(on) 35 mΩ, differs" },
+  { mpn: "SI2343CDS-T1-GE3", maker: "Vishay", detail: "Vds −30 V, differs" },
+  { mpn: "AO3401A", maker: "Alpha & Omega", detail: "Vds −30 V, differs" },
 ];
 
-const fitTag = (
-  <span className="inline-flex h-5 items-center gap-1 rounded-xs bg-raised px-1.5 text-[0.75rem] font-semibold whitespace-nowrap text-ink shadow-[inset_0_0_0_1px_var(--color-hairline-strong)]">
-    <Icon name="check" className="size-3" />
-    Drop-in
-  </span>
-);
+const brief = [
+  { label: "Specification", value: "12 V to 3.3 V, 3 A buck" },
+  { label: "PCB size", value: "50 × 30 mm, 4 layers" },
+  { label: "Standards", value: "IEC 62368-1, IPC-2221" },
+  { label: "Outputs", value: "KiCad schematic, KiCad PCB, Onshape enclosure" },
+];
 
 /** Two layers in one grid cell. The "after" layer is the default, so no-JS and reduced motion see the final state. */
 function Swap({
@@ -72,6 +65,13 @@ const checking = (
   <span className="inline-flex items-center gap-1 text-[0.75rem] font-semibold text-ink-subtle">
     <Icon name="loader" className="size-3" />
     Checking
+  </span>
+);
+
+const pending = (
+  <span className="inline-flex items-center gap-1 text-[0.75rem] font-semibold text-ink-subtle">
+    <Icon name="circle-dashed" className="size-3" />
+    To fill
   </span>
 );
 
@@ -138,13 +138,11 @@ export function HeroScene() {
         });
 
         tl.to({}, { duration: 0.6 });
-        swap(tl, "lifecycle", 0.8);
-        tl.to(q('[data-hs-reveal="eol"]'), { autoAlpha: 1, y: 0, duration: 0.3 }, 1.4);
-        swap(tl, "alternate", 2.1);
-        tl.to(q('[data-hs-reveal="eol"]'), { autoAlpha: 0, duration: 0.2 }, 2.1);
-        swap(tl, "fit", 2.4);
-        swap(tl, "vendor", 3.1);
-        tl.to(q('[data-hs-reveal="report"]'), { autoAlpha: 1, y: 0, duration: 0.3 }, 3.3);
+        swap(tl, "original", 0.7);
+        tl.to(q('[data-hs-reveal="candidates"]'), { autoAlpha: 1, y: 0, duration: 0.3 }, 1.2);
+        swap(tl, "fit", 1.9);
+        swap(tl, "brief", 2.7);
+        swap(tl, "gate", 3.3);
         tl.to({}, { duration: 0.6 });
 
         return () => setStep(-1);
@@ -165,7 +163,7 @@ export function HeroScene() {
         <div className="mx-auto grid w-full max-w-wide grid-cols-[minmax(0,1fr)] gap-10 px-6 py-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,2.1fr)] lg:items-center lg:gap-16 lg:px-12">
           <ol
             className="order-2 grid content-center gap-1 lg:order-1"
-            aria-label="How a parts list moves through Revuu"
+            aria-label="How Revuu compares parts and briefs a design"
           >
             {steps.map((step, i) => (
               <li
@@ -193,7 +191,7 @@ export function HeroScene() {
 
           <figure
             className="order-1 lg:order-2"
-            aria-label="Revuu showing the Rev C power board parts list, alternates for Q3 and the vendor contact"
+            aria-label="Revuu comparing the original part Q3 with three candidates, beside a hardware design brief"
           >
             <div className="overflow-hidden rounded-lg bg-raised shadow-[0_0_0_1px_var(--color-hairline),0_24px_48px_-24px_rgb(15_17_21/0.25)]">
               <div className="flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-hairline bg-surface px-4 py-3">
@@ -205,172 +203,127 @@ export function HeroScene() {
                 <span className="ml-auto text-caption font-medium text-ink-subtle">Demo data</span>
               </div>
 
-              <div className="grid lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
-                <div className="border-b border-hairline lg:border-r lg:border-b-0">
-                  <div className="flex items-center justify-between px-4 pt-4 pb-2">
-                    <p className="text-label">BOM lines</p>
-                    <p className="flex items-center gap-1.5 text-caption font-medium text-ink-subtle">
-                      <Icon name="file-spreadsheet" className="size-3.5" />
-                      power-board-rev-c.xlsx
-                    </p>
-                  </div>
-                  <table className="w-full text-ui">
-                    <caption className="sr-only">BOM lines for Rev C</caption>
-                    <thead>
-                      <tr className="border-y border-hairline bg-surface text-left text-caption text-ink-muted">
-                        <th scope="col" className="hidden h-8 px-4 font-semibold sm:table-cell">
-                          Refs
-                        </th>
-                        <th scope="col" className="h-8 pr-2 pl-4 font-semibold sm:px-2">
-                          MPN
-                        </th>
-                        <th scope="col" className="h-8 px-2 font-semibold">
-                          Lifecycle
-                        </th>
-                        <th scope="col" className="hidden h-8 px-4 font-semibold sm:table-cell">
-                          AVL
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {lines.slice(0, 3).map((line) => (
-                        <BomRow key={line.mpn} {...line} />
-                      ))}
-                      <tr className="border-b border-hairline">
-                        <td className="hidden h-11 px-4 whitespace-nowrap sm:table-cell">Q3</td>
-                        <td className="h-11 pr-2 pl-4 sm:px-2">
-                          <Swap
-                            group="alternate"
-                            before={
-                              <span className="grid">
-                                <span className="mpn">IRLML6402TRPBF</span>
-                                <span
-                                  data-hs-reveal="eol"
-                                  className="invisible inline-flex items-center gap-1 text-micro font-semibold text-accent opacity-0"
-                                >
-                                  <Icon name="replace" className="size-3" />3 alternates found
-                                </span>
-                              </span>
-                            }
-                            after={
-                              <span className="grid">
-                                <span className="mpn">DMP2035U-7</span>
-                                <span className="text-micro text-ink-subtle">
-                                  Replaces <span className="sr-only">EOL part </span>IRLML6402TRPBF
-                                </span>
-                              </span>
-                            }
-                          />
-                        </td>
-                        <td className="px-2">
-                          <Swap
-                            group="alternate"
-                            before={
-                              <Swap
-                                group="lifecycle"
-                                before={checking}
-                                after={<LifecycleBadge lifecycle="eol" size="sm" />}
-                              />
-                            }
-                            after={<LifecycleBadge lifecycle="active" size="sm" />}
-                          />
-                        </td>
-                        <td className="hidden px-4 sm:table-cell">
-                          <StatusChip status="approved" size="sm" />
-                        </td>
-                      </tr>
-                      {lines.slice(3).map((line) => (
-                        <BomRow key={line.mpn} {...line} />
-                      ))}
-                    </tbody>
-                  </table>
-                  <p className="px-4 py-3 text-caption font-medium text-ink-subtle">
-                    6 of 12 lines · Lifecycle from vendor records, 1 d ago
+              <div className="grid lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]">
+                <section
+                  aria-label="Part comparison"
+                  className="grid content-start gap-3 border-b border-hairline p-4 lg:border-r lg:border-b-0"
+                >
+                  <p className="flex items-center gap-2 text-label">
+                    <Icon name="git-compare" className="size-4" />
+                    Part comparison
                   </p>
-                </div>
 
-                <div className="grid content-start gap-4 p-4">
-                  <p className="text-label">
-                    Alternates for <span className="mpn">IRLML6402TRPBF</span>
+                  <div className="grid gap-1.5 rounded-md bg-surface px-3 py-2.5">
+                    <span className="text-[0.75rem] font-semibold text-ink-muted">Original</span>
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <span className="grid min-w-0">
+                        <span className="truncate mpn font-semibold">Q3 · IRLML6402TRPBF</span>
+                        <span className="truncate text-[0.75rem] text-ink-subtle">
+                          Infineon · P-channel, SOT-23, −20 V, 65 mΩ
+                        </span>
+                      </span>
+                      <Swap
+                        group="original"
+                        before={checking}
+                        after={<LifecycleBadge lifecycle="eol" size="sm" />}
+                      />
+                    </div>
+                  </div>
+
+                  <div data-hs-reveal="candidates" className="grid gap-2">
+                    <span className="text-[0.75rem] font-semibold text-ink-muted">
+                      3 of 4 candidates
+                    </span>
+                    <ul className="grid gap-2">
+                      {candidates.map((c) => (
+                        <li
+                          key={c.mpn}
+                          className="flex items-center gap-3 rounded-md bg-canvas px-3 py-2.5 shadow-[inset_0_0_0_1px_var(--color-hairline)]"
+                        >
+                          <div className="grid min-w-0 flex-1">
+                            <span className="truncate mpn font-semibold">{c.mpn}</span>
+                            <span className="truncate text-[0.75rem] text-ink-subtle">
+                              {c.maker} · {c.detail}
+                            </span>
+                          </div>
+                          <Swap group="fit" before={checking} after={<FitTag fit="Drop-in" />} />
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </section>
+
+                <section
+                  aria-label="Hardware design brief"
+                  className="grid content-start gap-3 p-4"
+                >
+                  <p className="flex items-center gap-2 text-label">
+                    <Icon name="circuit-board" className="size-4" />
+                    Hardware design brief
                   </p>
                   <ul className="grid gap-2">
-                    {alternates.map((alt) => (
+                    {brief.map((row) => (
                       <li
-                        key={alt.mpn}
-                        className="flex items-center gap-3 rounded-md bg-canvas px-3 py-2.5"
+                        key={row.label}
+                        className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-2 rounded-md bg-canvas px-3 py-2"
                       >
-                        <div className="grid min-w-0 flex-1">
-                          <span className="truncate mpn font-semibold">{alt.mpn}</span>
-                          <span className="truncate text-[0.75rem] text-ink-subtle">
-                            {alt.maker} · {alt.detail}
+                        <span className="grid min-w-0">
+                          <span className="text-[0.75rem] font-semibold text-ink-muted">
+                            {row.label}
                           </span>
-                        </div>
-                        <Swap group="fit" before={checking} after={fitTag} />
+                          <Swap
+                            group="brief"
+                            className="justify-items-start"
+                            before={<span className="text-ui text-ink-subtle">Not filled</span>}
+                            after={<span className="text-ui">{row.value}</span>}
+                          />
+                        </span>
+                        <Swap
+                          group="brief"
+                          before={pending}
+                          after={
+                            <Icon
+                              name="check-circle"
+                              label="Filled"
+                              className="mt-0.5 size-4 text-status-approved"
+                            />
+                          }
+                        />
                       </li>
                     ))}
                   </ul>
 
-                  <div className="grid gap-3 rounded-md bg-block-fr4 p-3">
+                  <div className="grid gap-2 rounded-md bg-block-copper p-3">
                     <Swap
-                      group="vendor"
+                      group="gate"
                       before={
                         <span className="flex items-center gap-1.5 text-ui font-semibold">
                           <Icon name="circle-dashed" className="size-3.5 text-status-pending" />
-                          Pick an alternate to see its vendor
+                          Fill 4 required fields to run
                         </span>
                       }
                       after={
                         <span className="grid gap-1">
-                          <span className="text-ui font-semibold">Diodes Inc.</span>
-                          <span className="flex items-center gap-1.5 text-ui">
-                            <Icon name="mail" className="size-3.5" />
-                            sales@diodes.example
+                          <span className="flex items-center gap-1.5 text-ui font-semibold">
+                            <Icon name="check-circle" className="size-3.5 text-status-approved" />
+                            Brief complete. Ready for one run.
                           </span>
                           <span className="text-[0.75rem] text-ink-muted">
-                            From the imported list
+                            Design runs are not live yet.
                           </span>
                         </span>
                       }
                     />
                   </div>
-
-                  <p
-                    data-hs-reveal="report"
-                    className="flex items-center gap-2 text-ui text-ink-muted"
-                  >
-                    <Icon name="differs" className="size-4 text-ink" />
-                    Specs compared after unit normalization
-                  </p>
-                </div>
+                </section>
               </div>
             </div>
             <figcaption className="mt-3 text-caption font-medium text-ink-subtle">
-              Sample parts list with demo data.
+              Sample comparison and brief with demo data.
             </figcaption>
           </figure>
         </div>
       </div>
     </div>
-  );
-}
-
-function BomRow({ refs, mpn, lifecycle, avl }: (typeof lines)[number]) {
-  return (
-    <tr className="border-b border-hairline">
-      <td className="hidden h-9 max-w-[7rem] truncate px-4 whitespace-nowrap sm:table-cell">
-        {refs}
-      </td>
-      <td className="h-9 max-w-[11rem] truncate pr-2 pl-4 mpn sm:px-2">{mpn}</td>
-      <td className="px-2">
-        <Swap
-          group="lifecycle"
-          before={checking}
-          after={<LifecycleBadge lifecycle={lifecycle} size="sm" />}
-        />
-      </td>
-      <td className="hidden px-4 sm:table-cell">
-        <StatusChip status={avl} size="sm" />
-      </td>
-    </tr>
   );
 }
